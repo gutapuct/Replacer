@@ -1,8 +1,9 @@
 
 <template>
     <div class="container pt-3" id="main-block">
-        <App></App>
-        <div class="header">
+        <Header isAdmin></Header>
+        
+        <div class="headerBlock">
             <div class="row pb-5">Добро пожаловать в Replacer</div>
             <div class="row pt-5">Путь к шаблону:</div>
             <div class="row">
@@ -20,10 +21,10 @@
 </template>
 
 <script>
-import App from './App.vue'
+import Header from './Header.vue'
 export default {
     name: 'main-block',
-    components: { App  },
+    components: { Header },
     data () {
         return {
             pathToTemplate: {},
