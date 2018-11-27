@@ -1,4 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Replacer.Business;
+using Replacer.Models;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -7,35 +13,47 @@ namespace Replacer
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ReasonsController : ApiController
     {
-        private static Reason _model = new Reason();
+        private static Business.Replacer _model = new Business.Replacer();
         // GET api/reasons
-        public IEnumerable<string> Get()
+        public async Task<IHttpActionResult> GetAsync()
         {
-            return _model.GetAllReasons();
+            return Ok(await _model.GetAllReasonsAsync());
         }
 
         // GET api/reasons/5
-        public string Get(int id)
-        {
-            return _model.GetReason(id);
-        }
+        //public async Task<IHttpActionResult> GetAsync(int id)
+        //{
+        //    return Ok(await _model.GetReasonAsync(id));
+        //}
 
         // POST api/reasons
-        public void Post([FromBody]string reason)
+        public async Task<IHttpActionResult> PostAsync([FromBody]Equipment reason)
         {
-            _model.AddReason(reason);
+            var isSuccess = await _model.AddReasonAsync(reason);
+            if (isSuccess)
+                return Content(HttpStatusCode.Created, reason);
+            else
+                return BadRequest();
         }
 
         // PUT api/reasons/5
-        public void Put(int id, [FromBody]string reason)
-        {
-            _model.ChangeReason(id, reason);
-        }
+        //public async Task<IHttpActionResult> PutAsync(int id, [FromBody]string reason)
+        //{
+        //    var isSuccess = await _model.ChangeReasonAsync(id, reason);
+        //    if (isSuccess)
+        //        return Ok();
+        //    else
+        //        return NotFound();
+        //}
 
-        // DELETE api/values/5
-        public void Delete (int id)
-        {
-            _model.DeleteReason(id);
-        }
+        //// DELETE api/values/5
+        //public async Task<IHttpActionResult> DeleteAsync (int id)
+        //{
+        //    var isSuccess = await _model.DeleteReasonAsync(id);
+        //    if (isSuccess)
+        //        return Ok();
+        //    else
+        //        return NotFound();
+        //}
     }
 }
