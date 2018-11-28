@@ -2,7 +2,7 @@
 <template>
     <div class="container pt-3" id="main-block">
         <Header isAdmin></Header>
-        
+
         <div class="headerBlock">
             <div class="row pb-5">Добро пожаловать в Replacer</div>
             <div class="row pt-5">Путь к шаблону:</div>

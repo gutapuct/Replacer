@@ -7,6 +7,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Configuration;
 using Replacer.Models;
+using Replacer.Extensions;
 
 namespace Replacer.Business
 {
@@ -24,9 +25,9 @@ namespace Replacer.Business
             collection = database.GetCollection<Equipment>("Equipments");
         }
 
-        public async Task<IEnumerable<Equipment>> GetAllReasonsAsync()
+        public async Task<IEnumerable<EquipmentShot>> GetAllEquipmentsAsync()
         {
-            return collection.AsQueryable();
+            return await collection.AsQueryable().ToEquipmentShotModel();
         }
 
         //public async Task<string> GetReasonAsync(int id)
@@ -41,14 +42,38 @@ namespace Replacer.Business
         //    }
         //}
 
-        public async Task<bool> AddReasonAsync(Equipment value)
+        public async Task<ResultMessage> AddEquipmentAsync(string typeName)
         {
-            if (!string.IsNullOrWhiteSpace(value.TypeName))
+            typeName = typeName.ToLower().Trim();
+            var resultMessage = new ResultMessage();
+
+            try
             {
-                await collection.InsertOneAsync(value);
-                return true;
+                if (!string.IsNullOrWhiteSpace(typeName))
+                {
+                    if (await collection.CountDocumentsAsync(i => i.TypeName.ToLower() == typeName) != 0)
+                    {
+                        resultMessage.Errors.Add($"Оборудование \"{typeName}\" уже есть в базе");
+                    }
+                    else
+                    {
+                        await collection.InsertOneAsync(new Equipment
+                        {
+                            TypeName = typeName,
+                            Names = new List<EquipmentsName> { new EquipmentsName { Name = typeName } }
+                        });
+                    }
+                }
+                else
+                {
+                    resultMessage.Errors.Add("Значение не должно быть пустым");
+                }
             }
-            return false;
+            catch (Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+            return resultMessage;
         }
 
         //public async Task<bool> ChangeReasonAsync(int id, string value)

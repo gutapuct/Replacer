@@ -11,32 +11,33 @@ using System.Web.Http.Cors;
 namespace Replacer
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
-    public class ReasonsController : ApiController
+    public class EquipmentsController : ApiController
     {
         private static Business.Replacer _model = new Business.Replacer();
-        // GET api/reasons
+        // GET api/equipments
         public async Task<IHttpActionResult> GetAsync()
         {
-            return Ok(await _model.GetAllReasonsAsync());
+            return Ok(await _model.GetAllEquipmentsAsync());
         }
 
-        // GET api/reasons/5
+        // GET api/equipments/5
         //public async Task<IHttpActionResult> GetAsync(int id)
         //{
         //    return Ok(await _model.GetReasonAsync(id));
         //}
 
-        // POST api/reasons
-        public async Task<IHttpActionResult> PostAsync([FromBody]Equipment reason)
+        // POST api/equipments
+        public async Task<IHttpActionResult> PostAsync([FromBody]string equipment)
         {
-            var isSuccess = await _model.AddReasonAsync(reason);
-            if (isSuccess)
-                return Content(HttpStatusCode.Created, reason);
+            var resultMessage = await _model.AddEquipmentAsync(equipment);
+
+            if (resultMessage.Errors.Count == 0)
+                return Content(HttpStatusCode.Created, resultMessage.Object);
             else
-                return BadRequest();
+                return Content(HttpStatusCode.BadRequest, resultMessage);
         }
 
-        // PUT api/reasons/5
+        // PUT api/equipments/5
         //public async Task<IHttpActionResult> PutAsync(int id, [FromBody]string reason)
         //{
         //    var isSuccess = await _model.ChangeReasonAsync(id, reason);
@@ -46,7 +47,7 @@ namespace Replacer
         //        return NotFound();
         //}
 
-        //// DELETE api/values/5
+        //// DELETE api/equipments/5
         //public async Task<IHttpActionResult> DeleteAsync (int id)
         //{
         //    var isSuccess = await _model.DeleteReasonAsync(id);
