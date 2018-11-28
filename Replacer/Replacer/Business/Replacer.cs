@@ -25,9 +25,18 @@ namespace Replacer.Business
             collection = database.GetCollection<Equipment>("Equipments");
         }
 
-        public async Task<IEnumerable<EquipmentShot>> GetAllEquipmentsAsync()
+        public async Task<ResultMessage> GetAllEquipmentsAsync()
         {
-            return await collection.AsQueryable().ToEquipmentShotModel();
+            var resultMessage = new ResultMessage();
+            try
+            {
+                resultMessage.Object = await collection.AsQueryable().ToEquipmentShotModel();
+            }
+            catch (Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+            return resultMessage;
         }
 
         //public async Task<string> GetReasonAsync(int id)
