@@ -7,9 +7,9 @@
                 </div>
                 <div class="col-md-6 settings">
                     <router-link :to="this.getUrlByBtn">
-                        <button class="btn btn-link btn-lg">
+                        <b-button variant="link" size="lg">
                             {{getBtnName}}
-                        </button>
+                        </b-button>
                     </router-link>
                 </div>
             </div>
@@ -22,11 +22,6 @@ export default {
     name: 'headerBlock',
     props: {
         isAdmin: Boolean
-    },
-    data () {
-        return {
-
-        }
     },
     methods:{
     },

@@ -1,6 +1,7 @@
 ﻿using Owin;
 using System.Web.Http;
 using Microsoft.Owin.Cors;
+using Newtonsoft.Json.Serialization;
 
 namespace Replacer
 {
@@ -14,6 +15,11 @@ namespace Replacer
 
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
+
+            //config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            //config.Formatters.JsonFormatter.UseDataContractJsonSerializer = false;
+            config.MapHttpAttributeRoutes();
+
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",

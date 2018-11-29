@@ -37,6 +37,18 @@ namespace Replacer
                 return Content(HttpStatusCode.BadRequest, resultMessage);
         }
 
+        [HttpPost]
+        [Route("~/api/equipments/names")]
+        public async Task<IHttpActionResult> PostEquipmentNames([FromBody]EquipmentShot equipment)
+        {
+            var resultMessage = await _model.ReplaceNames(equipment);
+
+            if (resultMessage.Errors.Count == 0)
+                return Ok();
+            else
+                return Content(HttpStatusCode.NotModified, resultMessage);
+        }
+
         // PUT api/equipments/5
         //public async Task<IHttpActionResult> PutAsync(int id, [FromBody]string reason)
         //{

@@ -7,7 +7,7 @@ namespace Replacer.Models
     {
         public ObjectId Id { get; set; }
         public string TypeName { get; set; }
-        public List<EquipmentsName> Names { get; set; }
+        public List<string> Names { get; set; }
         public int Order { get; set; }
     }
 

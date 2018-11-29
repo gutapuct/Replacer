@@ -20,27 +20,25 @@
                 <b-list-group>
                     <b-list-group-item
                         variant="info"
-                        v-for="(reason, index) in reasons"
+                        v-for="(reason, index) in equipments"
                         :key="index"
                         class="mt-1 mb-1"
                     >
                         <div>
-                            <span @click="showReason(reason)" class="pointer">
+                            <span @click="showEquipment(reason)" class="pointer">
                                 {{reason.TypeName}} ({{reason.Names.length}})
                             </span>
                         </div>
                         <transition name="fade" mode="out-in">
                             <div v-show="reason.IsShowNames">
-                                <b-list-group>
-                                    <b-list-group-item
-                                        variant="light"
-                                        class="m-1"
-                                        v-for="(name, index) in reason.Names"
-                                        :key="index"
-                                    >
-                                        {{name.Name}}
-                                    </b-list-group-item>
-                                </b-list-group>
+                                <div v-for="(name, index) in reason.Names" :key="index">
+                                    <input
+                                        type="text"
+                                        v-model="reason.Names[index]"
+                                        class="m-1 form-control"
+                                        @blur="SaveEquipmentName(reason)" />
+                                </div>
+                                <b-button variant="success" @click="addName(reason.Names)">+</b-button>
                             </div>
                         </transition>
                     </b-list-group-item>
@@ -80,7 +78,7 @@ export default {
     components: { Header },
     data() {
         return {
-            reasons: [],
+            equipments: [],
             newValue: '',
             modalShow: false,
             modalErrors: [],
@@ -88,15 +86,15 @@ export default {
         }
     },
     created() {
-        this.getAllReasons();
+        this.getAllEquipments();
     },
     methods: {
-        getAllReasons() {
+        getAllEquipments() {
             this.$http
-                .get(api.getAllReasons)
+                .get(api.getAllEquipments)
                 .then(
                     function(response){
-                        this.reasons = response.data.Object;
+                        this.equipments = response.data.Object;
                     },
                     function(error){
                         if (error.status === 0)
@@ -108,10 +106,10 @@ export default {
         },
         AddNewValue(){
             this.$http
-                .post(api.postAddNewValue, JSON.stringify(this.newValue))
+                .post(api.postAddNewEquipment, JSON.stringify(this.newValue))
                 .then(
                     function(response){
-                        this.getAllReasons();
+                        this.getAllEquipments();
                         this.newValue = '';
                     },
                     function(error){
@@ -124,8 +122,8 @@ export default {
                     }
                 )
         },
-        showReason(reason){
-            reason.IsShowNames = !reason.IsShowNames;
+        showEquipment(equipment){
+            equipment.IsShowNames = !equipment.IsShowNames;
         },
         toggleModal(){
             if (this.modalShow) //if open
@@ -141,6 +139,27 @@ export default {
                 this.modalErrors.push(element);
             });
             this.toggleModal();
+        },
+        SaveEquipmentName(equipment){
+            this.$http
+                .post(api.postChangeEquipmentNames, { TypeName: equipment.TypeName, Names: equipment.Names })
+                .then(
+                    function(response){},
+                    function(error){
+                        if (error !== undefined && error.data !== undefined && error.data.Errors !== undefined)
+                        {
+                            this.addErrorsToModal(error.data.Errors);
+                        } else {
+                            this.addErrorToModal(error);
+                        }
+                    }
+                )
+        },
+        addName(names){
+            if (names.filter(i => i.trim() === "").length > 0)
+                this.addErrorToModal("Уже есть пустое поле для создания нового значения! Используйте его!");
+            else
+                names.push( "" );
         }
     },
     computed: {

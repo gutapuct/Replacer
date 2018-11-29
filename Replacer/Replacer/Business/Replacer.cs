@@ -69,7 +69,7 @@ namespace Replacer.Business
                         await collection.InsertOneAsync(new Equipment
                         {
                             TypeName = typeName,
-                            Names = new List<EquipmentsName> { new EquipmentsName { Name = typeName } }
+                            Names = new List<string>() { typeName },
                         });
                     }
                 }
@@ -77,6 +77,23 @@ namespace Replacer.Business
                 {
                     resultMessage.Errors.Add("Значение не должно быть пустым");
                 }
+            }
+            catch (Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+            return resultMessage;
+        }
+
+        public async Task<ResultMessage> ReplaceNames(EquipmentShot equipment)
+        {
+            var resultMessage = new ResultMessage();
+
+            try
+            {
+                var qwe = await collection.UpdateOneAsync(
+                    i => i.TypeName == equipment.TypeName,
+                    Builders<Equipment>.Update.Set(x => x.Names, equipment.Names.Where(i => i.Trim().Length > 0)));
             }
             catch (Exception ex)
             {

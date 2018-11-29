@@ -117,7 +117,6 @@
     <Compile Include="Controllers\EquipmentsController.cs" />
     <Compile Include="Extensions\MapHelper.cs" />
     <Compile Include="Models\Equipment.cs" />
-    <Compile Include="Models\EquipmentsName.cs" />
     <Compile Include="Models\Reason.cs" />
     <Compile Include="Models\ResultMessage.cs" />
     <Compile Include="Program.cs" />

@@ -1,6 +1,7 @@
 const server = "http://localhost:9009/api/";
 
 export default {
-    getAllReasons: server + "equipments",
-    postAddNewValue: server + "equipments"
+    getAllEquipments: server + "equipments",
+    postAddNewEquipment: server + "equipments",
+    postChangeEquipmentNames: server + "equipments/names"
 }
