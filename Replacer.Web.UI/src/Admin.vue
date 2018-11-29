@@ -3,7 +3,6 @@
         <div id="admin">
             <Header :isAdmin="false"></Header>
             
-            <div>Оборудование:</div>
             <div class="row pt-3">
                 <div class="col-md-11">
                     <b-form-input v-model="newValue"
@@ -24,23 +23,11 @@
                         :key="index"
                         class="mt-1 mb-1"
                     >
-                        <div>
-                            <span @click="showEquipment(equipment)" class="pointer">
-                                {{equipment.TypeName}} ({{equipment.Names.length}})
-                            </span>
-                        </div>
-                        <transition name="fade" mode="out-in">
-                            <div v-show="equipment.IsShowNames">
-                                <div v-for="(name, index) in equipment.Names" :key="index">
-                                    <input
-                                        type="text"
-                                        v-model="equipment.Names[index]"
-                                        class="m-1 form-control"
-                                        @blur="(e) => SaveEquipmentName(equipment, e)" />
-                                </div>
-                                <b-button variant="success" @click="addName(equipment.Names)" class="mt-2 ml-3">Добавить</b-button>
-                            </div>
-                        </transition>
+                        <EquipmentLine
+                            :equipment="equipment"
+                            :addErrorToModal="addErrorToModal"
+                            :addErrorsToModal="addErrorsToModal"
+                            ></EquipmentLine>
                     </b-list-group-item>
                 </b-list-group>
             </div>
@@ -72,10 +59,11 @@
 
 <script>
 import Header from './Header.vue'
+import EquipmentLine from './EquipmentLine.vue'
 import api from './Constants.js'
 
 export default {
-    components: { Header },
+    components: { Header, EquipmentLine },
     data() {
         return {
             equipments: [],
@@ -122,9 +110,6 @@ export default {
                     }
                 )
         },
-        showEquipment(equipment){
-            equipment.IsShowNames = !equipment.IsShowNames;
-        },
         toggleModal(){
             if (this.modalShow) //if open
                 this.modalErrors = [];
@@ -140,33 +125,6 @@ export default {
             });
             this.toggleModal();
         },
-        SaveEquipmentName(equipment, e){
-            this.$http
-                .post(api.postChangeEquipmentNames, { TypeName: equipment.TypeName, Names: equipment.Names })
-                .then(
-                    function(response){
-                        e.target.disabled = "true";
-                        setTimeout(function () {
-                            e.target.disabled = "";
-                            equipment.Names = [...equipment.Names.filter(el => el.length > 0)];
-                        }, 1000);
-                    },
-                    function(error){
-                        if (error !== undefined && error.data !== undefined && error.data.Errors !== undefined)
-                        {
-                            this.addErrorsToModal(error.data.Errors);
-                        } else {
-                            this.addErrorToModal(error);
-                        }
-                    }
-                )
-        },
-        addName(names){
-            if (names.filter(i => i.trim() === "").length > 0)
-                this.addErrorToModal("Уже есть пустое поле для создания нового значения! Используйте его!");
-            else
-                names.push( "" );
-        }
     },
     computed: {
         getDisabledBtn(){
