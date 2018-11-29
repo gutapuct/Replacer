@@ -20,25 +20,25 @@
                 <b-list-group>
                     <b-list-group-item
                         variant="info"
-                        v-for="(reason, index) in equipments"
+                        v-for="(equipment, index) in equipments"
                         :key="index"
                         class="mt-1 mb-1"
                     >
                         <div>
-                            <span @click="showEquipment(reason)" class="pointer">
-                                {{reason.TypeName}} ({{reason.Names.length}})
+                            <span @click="showEquipment(equipment)" class="pointer">
+                                {{equipment.TypeName}} ({{equipment.Names.length}})
                             </span>
                         </div>
                         <transition name="fade" mode="out-in">
-                            <div v-show="reason.IsShowNames">
-                                <div v-for="(name, index) in reason.Names" :key="index">
+                            <div v-show="equipment.IsShowNames">
+                                <div v-for="(name, index) in equipment.Names" :key="index">
                                     <input
                                         type="text"
-                                        v-model="reason.Names[index]"
+                                        v-model="equipment.Names[index]"
                                         class="m-1 form-control"
-                                        @blur="SaveEquipmentName(reason)" />
+                                        @blur="(e) => SaveEquipmentName(equipment, e)" />
                                 </div>
-                                <b-button variant="success" @click="addName(reason.Names)">+</b-button>
+                                <b-button variant="success" @click="addName(equipment.Names)" class="mt-2 ml-3">Добавить</b-button>
                             </div>
                         </transition>
                     </b-list-group-item>
@@ -140,11 +140,17 @@ export default {
             });
             this.toggleModal();
         },
-        SaveEquipmentName(equipment){
+        SaveEquipmentName(equipment, e){
             this.$http
                 .post(api.postChangeEquipmentNames, { TypeName: equipment.TypeName, Names: equipment.Names })
                 .then(
-                    function(response){},
+                    function(response){
+                        e.target.disabled = "true";
+                        setTimeout(function () {
+                            e.target.disabled = "";
+                            equipment.Names = [...equipment.Names.filter(el => el.length > 0)];
+                        }, 1000);
+                    },
                     function(error){
                         if (error !== undefined && error.data !== undefined && error.data.Errors !== undefined)
                         {
