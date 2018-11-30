@@ -1,7 +1,6 @@
-
 <template>
     <div class="container pt-3" id="main-block">
-        <Header isAdmin></Header>
+        <Header btnName="Настройки" btnUrl="admin"></Header>
 
         <div>
             <div class="row pb-5">Добро пожаловать в Replacer</div>

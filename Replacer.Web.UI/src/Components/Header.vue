@@ -6,9 +6,9 @@
                     <h2>Replacer</h2>
                 </div>
                 <div class="col-md-6 settings">
-                    <router-link :to="this.getUrlByBtn">
+                    <router-link :to="'/' + this.btnUrl">
                         <b-button variant="link" size="lg">
-                            {{getBtnName}}
+                            {{btnName}}
                         </b-button>
                     </router-link>
                 </div>
@@ -20,18 +20,9 @@
 <script>
 export default {
     props: {
-        isAdmin: Boolean
+        btnName: String,
+        btnUrl: String
     },
-    methods:{
-    },
-    computed: {
-        getBtnName(){
-            return this.isAdmin ? 'Настройки' : 'Главная';
-        },
-        getUrlByBtn() {
-            return this.isAdmin ? "/admin" : "/";
-        }
-    }
 }
 </script>
 

@@ -1,7 +1,7 @@
 <template>
     <div class="container pt-3" id="main-block">
         <div id="admin">
-            <Header :isAdmin="false"></Header>
+            <Header btnName="Главная" btnUrl=""></Header>
             
             <div class="row pt-3">
                 <div class="col-md-11">
@@ -60,7 +60,7 @@
 <script>
 import Header from './Header.vue'
 import EquipmentLine from './EquipmentLine.vue'
-import api from './Constants.js'
+import api from '../Content/scripts/Constants.js'
 
 export default {
     components: { Header, EquipmentLine },

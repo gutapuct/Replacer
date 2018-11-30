@@ -1,10 +1,21 @@
 <template>
     <div id="EquipmentLine">
-        <div>
-            <span @click="showEquipment(equipment)" class="pointer">
-                {{equipment.TypeName}} ({{equipment.Names.length}})
-            </span>
-        </div>
+        <b-row>
+            <b-col>
+                <span @click="showEquipment(equipment)" class="pointer">
+                    {{equipment.TypeName}} ({{equipment.Names.length}})
+                </span>
+            </b-col>
+            <transition name="fade" mode="out-in">
+                <b-col class="textAlignRight" v-show="equipment.IsShowNames">
+                    <router-link to="/equipment">
+                        <b-button variant="primary" size="sm" class="m-1">
+                            Причины и рекоммендации
+                        </b-button>
+                    </router-link>
+                </b-col>
+            </transition>
+        </b-row>
         <transition name="fade" mode="out-in">
             <div v-show="equipment.IsShowNames">
                 <div v-for="(name, index) in equipment.Names" :key="index">
@@ -21,7 +32,7 @@
 </template>
 
 <script>
-import api from './Constants.js'
+import api from '../Content/scripts/Constants.js'
 
 export default {
     name: "EquipmentLine",
@@ -69,5 +80,5 @@ export default {
 </script>
 
 <style>
-
+    
 </style>

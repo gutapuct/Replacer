@@ -5,3 +5,7 @@
 .pointer:hover{
     font-weight: bold;
 }
+
+.textAlignRight{
+    text-align: right;
+}
