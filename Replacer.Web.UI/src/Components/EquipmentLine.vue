@@ -8,7 +8,7 @@
             </b-col>
             <transition name="fade" mode="out-in">
                 <b-col class="textAlignRight" v-show="equipment.IsShowNames">
-                    <router-link to="/equipment">
+                    <router-link :to="{ name: 'equipment', params: {id: equipment.Id } }">
                         <b-button variant="primary" size="sm" class="m-1">
                             Причины и рекоммендации
                         </b-button>
@@ -25,7 +25,7 @@
                         class="m-1 form-control"
                         @change="(e) => SaveEquipmentName(equipment, e)" />
                 </div>
-                <b-button variant="success" @click="addName(equipment.Names)" class="mt-2 ml-3">Добавить</b-button>
+                <img src="../Content/images/Add.png" width="48" @click="addName(equipment.Names)" class="pointer mt-2 ml-3" /> 
             </div>
         </transition>
     </div>

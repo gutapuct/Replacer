@@ -1,6 +1,6 @@
 <template>
     <div id="headerBlock">
-        <b-alert show variant="secondary">
+        <b-alert show variant="secondary pt-3 pb-3">
             <div class="row">
                 <div class="col-md-6">
                     <h2>Replacer</h2>

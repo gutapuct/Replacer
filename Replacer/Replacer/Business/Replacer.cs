@@ -39,17 +39,31 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        //public async Task<string> GetReasonAsync(int id)
-        //{
-        //    if (reasons.Count > id && id >= 0)
-        //    {
-        //        return reasons[id];
-        //    }
-        //    else
-        //    {
-        //        return "Error. We couldn't find that reason.";
-        //    }
-        //}
+        public async Task<ResultMessage> GetEquipmentById(string id)
+        {
+            var resultMessage = new ResultMessage();
+            var objectId = new ObjectId(id);
+
+            try
+            {
+                var equipment = await (await collection.FindAsync(i => i.Id == objectId)).SingleOrDefaultAsync();
+
+                if (equipment == null)
+                {
+                    resultMessage.Errors.Add("Оборудование не найдено!");
+                }
+                else
+                {
+                    resultMessage.Object = equipment;
+                }
+            }
+            catch (Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+
+            return resultMessage;
+        }
 
         public async Task<ResultMessage> AddEquipmentAsync(string typeName)
         {

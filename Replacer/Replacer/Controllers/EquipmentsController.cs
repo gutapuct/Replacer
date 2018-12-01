@@ -20,11 +20,16 @@ namespace Replacer
             return Ok(await _model.GetAllEquipmentsAsync());
         }
 
-        // GET api/equipments/5
-        //public async Task<IHttpActionResult> GetAsync(int id)
-        //{
-        //    return Ok(await _model.GetReasonAsync(id));
-        //}
+        // GET api/equipments/5c025e1346d9e5403cf6abaf
+        public async Task<IHttpActionResult> GetAsync(string id)
+        {
+            var resultMessage = await _model.GetEquipmentById(id);
+
+            if (resultMessage.Errors.Count == 0)
+                return Ok(resultMessage);
+            else
+                return Content(HttpStatusCode.NotFound, resultMessage);
+        }
 
         // POST api/equipments
         public async Task<IHttpActionResult> PostAsync([FromBody]string equipment)
