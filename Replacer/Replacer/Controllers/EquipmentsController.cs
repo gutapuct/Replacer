@@ -14,13 +14,16 @@ namespace Replacer
     public class EquipmentsController : ApiController
     {
         private static Business.Replacer _model = new Business.Replacer();
+
         // GET api/equipments
+        [HttpGet]
         public async Task<IHttpActionResult> GetAsync()
         {
             return Ok(await _model.GetAllEquipmentsAsync());
         }
 
         // GET api/equipments/5c025e1346d9e5403cf6abaf
+        [HttpGet]
         public async Task<IHttpActionResult> GetAsync(string id)
         {
             var resultMessage = await _model.GetEquipmentById(id);
@@ -32,6 +35,7 @@ namespace Replacer
         }
 
         // POST api/equipments
+        [HttpPost]
         public async Task<IHttpActionResult> PostAsync([FromBody]string equipment)
         {
             var resultMessage = await _model.AddEquipmentAsync(equipment);
@@ -54,24 +58,28 @@ namespace Replacer
                 return Content(HttpStatusCode.NotModified, resultMessage);
         }
 
-        // PUT api/equipments/5
-        //public async Task<IHttpActionResult> PutAsync(int id, [FromBody]string reason)
-        //{
-        //    var isSuccess = await _model.ChangeReasonAsync(id, reason);
-        //    if (isSuccess)
-        //        return Ok();
-        //    else
-        //        return NotFound();
-        //}
+        [HttpPost]
+        [Route("~/api/equipment/reasons/{id}")]
+        public async Task<IHttpActionResult> PostChangeReasons(string id, [FromBody]IEnumerable<Reason> reasons)
+        {
+            var resultMessage = await _model.ReplaceReasons(id, reasons);
 
-        //// DELETE api/equipments/5
-        //public async Task<IHttpActionResult> DeleteAsync (int id)
-        //{
-        //    var isSuccess = await _model.DeleteReasonAsync(id);
-        //    if (isSuccess)
-        //        return Ok();
-        //    else
-        //        return NotFound();
-        //}
+            if (resultMessage.Errors.Count == 0)
+                return Ok();
+            else
+                return Content(HttpStatusCode.BadRequest, resultMessage);
+        }
+
+        [HttpPost]
+        [Route("~/api/equipment/typename/{id}/{typeName}")]
+        public async Task<IHttpActionResult> PostSaveTypeName(string id, string typeName)
+        {
+            var resultMessage = await _model.ReplaceTypeNameById(id, typeName);
+
+            if (resultMessage.Errors.Count == 0)
+                return Ok();
+            else
+                return Content(HttpStatusCode.BadRequest, resultMessage);
+        }
     }
 }

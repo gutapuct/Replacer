@@ -3,6 +3,8 @@
         <div id="admin">
             <Header btnName="Главная" btnUrl=""></Header>
             
+            <b-button variant="primary">Импорт</b-button>
+
             <div class="row pt-3">
                 <div class="col-md-11">
                     <b-form-input v-model="newValue"
@@ -12,7 +14,7 @@
                     </b-form-input>
                 </div>
                 <div class="col-md-1">
-                    <b-button class="btn-success" :disabled="getDisabledBtn" @click="AddNewValue()">Добавить</b-button>
+                    <b-button class="btn btn-success" :disabled="getDisabledBtn" @click="addNewValue()">Добавить</b-button>
                 </div>
             </div>
             <div class="p-3">
@@ -92,7 +94,7 @@ export default {
                     }
                 )
         },
-        AddNewValue(){
+        addNewValue(){
             this.$http
                 .post(api.postAddNewEquipment, JSON.stringify(this.newValue))
                 .then(

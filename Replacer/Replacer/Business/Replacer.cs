@@ -84,6 +84,7 @@ namespace Replacer.Business
                         {
                             TypeName = typeName,
                             Names = new List<string>() { typeName },
+                            Reasons = new List<Reason>()
                         });
                     }
                 }
@@ -105,7 +106,7 @@ namespace Replacer.Business
 
             try
             {
-                var qwe = await collection.UpdateOneAsync(
+                await collection.UpdateOneAsync(
                     i => i.TypeName == equipment.TypeName,
                     Builders<Equipment>.Update.Set(x => x.Names, equipment.Names.Where(i => i.Trim().Length > 0)));
             }
@@ -116,24 +117,49 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        //public async Task<bool> ChangeReasonAsync(int id, string value)
-        //{
-        //    if (reasons.Count > id && id >= 0)
-        //    {
-        //        reasons[id] = value;
-        //        return true;
-        //    }
-        //    return false;
-        //}
+        public async Task<ResultMessage> ReplaceReasons(string id, IEnumerable<Reason> reasons)
+        {
+            var resultMessage = new ResultMessage();
+            var objectId = new ObjectId(id);
 
-        //public async Task<bool> DeleteReasonAsync(int id)
-        //{
-        //    if (reasons.Count > id && id >= 0)
-        //    {
-        //        reasons.RemoveAt(id);
-        //        return true;
-        //    }
-        //    return false;
-        //}
+            try
+            {
+                await collection.UpdateOneAsync(
+                    i => i.Id == objectId,
+                    Builders<Equipment>.Update.Set(x =>
+                        x.Reasons,
+                        reasons.Where(i => i.NameReason.Trim().Length > 0 || i.NameRecommendation.Trim().Length > 0)));
+            }
+            catch(Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+            return resultMessage;
+        }
+
+        public async Task<ResultMessage> ReplaceTypeNameById(string id, string newTypeName)
+        {
+            var resultMessage = new ResultMessage();
+            var objectId = new ObjectId(id);
+
+            try
+            {
+                if (await collection.CountDocumentsAsync(i => i.TypeName == newTypeName) > 0)
+                {
+                    resultMessage.Errors.Add("В списке уже есть оборудование с таким именем. Назовите иначе.");
+                }
+                else
+                {
+                    await collection.UpdateOneAsync(
+                        i => i.Id == objectId,
+                        Builders<Equipment>.Update.Set(x => x.TypeName, newTypeName));
+                }
+            }
+            catch(Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+            return resultMessage;
+        }
     }
 }
