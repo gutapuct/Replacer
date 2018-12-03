@@ -2,6 +2,7 @@
     <div class="container pt-3" id="main-block">
         <div id="admin">
             <Header btnName="Главная" btnUrl=""></Header>
+            <ModalWindow :toggleModal="toggleModal" :modalShow="modalShow" :modalErrors="modalErrors"></ModalWindow>
             
             <b-button variant="primary">Импорт</b-button>
 
@@ -35,28 +36,6 @@
                     </b-list-group-item>
                 </b-list-group>
             </div>
-
-            <!-- Modal window -->
-            <div>
-                <b-modal v-model="modalShow" :title="modalTitle" hide-header-close no-close-on-esc no-close-on-backdrop centered hide-footer>
-                    <div class="d-block">
-                        <div
-                            v-for="(error, index) in modalErrors"
-                            :key="index"
-                            class="pt-3"
-                        >
-                            <span v-if="modalErrors.length > 1">
-                                {{index + 1}}. 
-                            </span>
-                            <span>
-                                {{error}}
-                            </span> 
-                        </div>
-                    </div>
-                    <b-btn class="mt-3" variant="outline-danger" block @click="toggleModal">Закрыть</b-btn>
-                </b-modal>
-            </div>
-
         </div>
     </div>
 </template>
@@ -64,10 +43,11 @@
 <script>
 import Header from './Header.vue'
 import EquipmentLine from './EquipmentLine.vue'
+import ModalWindow from './ModalWindow.vue'
 import api from '../Content/scripts/Constants.js'
 
 export default {
-    components: { Header, EquipmentLine },
+    components: { Header, EquipmentLine, ModalWindow },
     data() {
         return {
             equipments: [],

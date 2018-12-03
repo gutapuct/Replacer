@@ -1,6 +1,7 @@
 <template>
     <div class="container pt-3" id="equipment">
         <Header btnName="Назад" btnUrl="admin"></Header>
+        <ModalWindow :toggleModal="toggleModal" :modalShow="modalShow" :modalErrors="modalErrors"></ModalWindow>
         
         <b-alert show class="typeName pr-5">
             <span v-if="!inputForTypeName">{{equipment.TypeName}}
@@ -64,15 +65,19 @@
 
 <script>
 import Header from './Header.vue'
-import api from '../Content/scripts/Constants.js'
+import ModalWindow from './ModalWindow.vue'
 import ReasonLine from './ReasonLine.vue'
+import api from '../Content/scripts/Constants.js'
 
 export default {
-    components: { Header, ReasonLine },
+    components: { Header, ReasonLine, ModalWindow },
     data() {
         return {
             equipment: {},
             inputForTypeName: false,
+            modalShow: false,
+            modalErrors: [],
+            modalTitle: "Ошибка",
         }
     },
     created() {
@@ -80,7 +85,6 @@ export default {
     },
     methods: {
         getEquipmentById(id){
-            console.log(api.getEquipmentById + id);
             this.$http
                 .get(api.getEquipmentById + id)
                 .then(
@@ -97,7 +101,7 @@ export default {
         },
         addReason(){
             if (this.equipment.Reasons.some(el => el.NameReason.trim().length === 0))
-                alert("Добавь уже имеющееся");
+                this.addErrorToModal("Уже есть пустое поле для создания нового значения! Используйте его!");
             else
                 this.equipment.Reasons.push({ NameReason: "", NameRecommendation: "" });
         },
@@ -172,6 +176,21 @@ export default {
                         }
                     }
                 )
+        },
+        toggleModal(){
+            if (this.modalShow) //if open
+                this.modalErrors = [];
+            this.modalShow = !this.modalShow;
+        },
+        addErrorToModal(error){
+            this.modalErrors.push(error);
+            this.toggleModal();
+        },
+        addErrorsToModal(errors){
+            errors.forEach(element => {
+                this.modalErrors.push(element);
+            });
+            this.toggleModal();
         },
     },
     computed: {
