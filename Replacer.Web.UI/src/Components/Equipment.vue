@@ -37,18 +37,20 @@
         </b-alert>
         <div class="p-3">
             <b-list-group>
-                <b-list-group-item
-                    variant="info"
-                    v-for="(reason, index) in equipment.Reasons"
-                    :key="index"
-                >
-                    <ReasonLine
-                        :reason="reason"
-                        :index="index"
-                        :saveReasons="saveReasons"
-                        :deleteReason="deleteReason">
-                    </ReasonLine>
-                </b-list-group-item>
+                <transition-group name="list" tag="p">
+                    <b-list-group-item
+                        variant="info"
+                        v-for="(reason, index) in equipment.Reasons"
+                        :key="index"
+                    >
+                        <ReasonLine
+                            :reason="reason"
+                            :index="index"
+                            :saveReasons="saveReasons"
+                            :deleteReason="deleteReason">
+                        </ReasonLine>
+                    </b-list-group-item>
+                </transition-group>
             </b-list-group>
         </div>
         <div>
@@ -175,16 +177,23 @@ export default {
     computed: {
         checkTypeName(){
             return this.equipment.TypeName.trim().length > 0;
-        }
+        },
     }
 }
 </script>
 
 <style>
-    .typeName{
-        font-size: 24px;
-        font-weight: bold;
-        text-align: right;
-    }
+.typeName{
+    font-size: 24px;
+    font-weight: bold;
+    text-align: right;
+}
+.list-enter-active {
+    transition: all 0.8s;
+}
+.list-enter, .list-leave-to {
+    opacity: 0;
+    transform: translateX(-15px);
+} 
 </style>
 

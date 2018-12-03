@@ -7,5 +7,6 @@ export default {
     getEquipmentById: server + "equipments/", 
     postChangeReasons: server + 'equipment/reasons/',
     postSaveTypeName: server + 'equipment/typename/',
-    postDeleteEquipment: server + 'equipments/'
+    postDeleteEquipment: server + 'equipments/',
+    postChangeOrder: server + "equipment/order/"
 }

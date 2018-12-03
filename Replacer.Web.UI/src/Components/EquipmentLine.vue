@@ -16,24 +16,32 @@
                 </b-col>
             </transition>
             <b-col cols="1" class="textAlignRight m-1">
-                <img src="../Content/images/Up.png" class="imgIcon24 mr-1" />
-                <img src="../Content/images/Down.png" class="imgIcon24" />
+                <img
+                    src="../Content/images/Up.png"
+                    class="imgIcon16 m-1 arrowApDown pointer"
+                    @click="ChangeOrder(-1)" />
+                <img
+                    src="../Content/images/Down.png"
+                    class="imgIcon16 m-1 arrowApDown pointer"
+                    @click="ChangeOrder(1)" />
             </b-col>
         </b-row>
         <transition name="fade" mode="out-in">
             <div v-show="equipment.IsShowNames">
-                <b-row v-for="(name, index) in equipment.Names" :key="index">
-                    <b-col cols="11">
-                        <input
-                            type="text"
-                            v-model="equipment.Names[index]"
-                            class="m-1 form-control"
-                            @change="(e) => saveEquipmentName(e)" />
-                    </b-col>
-                    <b-col cols="1">
-                        <img src=../Content/images/Delete2.png class="imgIcon24 pointer mt-2" @click="deleteName(index)" />
-                    </b-col>
-                </b-row>
+                <transition-group name="list" tag="p">
+                    <b-row v-for="(name, index) in equipment.Names" :key="index">
+                        <b-col cols="11">
+                            <input
+                                type="text"
+                                v-model="equipment.Names[index]"
+                                class="m-1 form-control"
+                                @change="(e) => saveEquipmentName(e)" />
+                        </b-col>
+                        <b-col cols="1">
+                            <img src=../Content/images/Delete2.png class="imgIcon24 pointer mt-2" @click="deleteName(index)" />
+                        </b-col>
+                    </b-row>
+                </transition-group>
                 <img src="../Content/images/Add.png" @click="addName()" class="imgIcon48 pointer mt-2 ml-3" /> 
             </div>
         </transition>
@@ -49,6 +57,8 @@ export default {
         equipment: Object,
         addErrorToModal: Function,
         addErrorsToModal: Function,
+        changeNeedToMove: Function,
+        getAllEquipments: Function,
     },
     methods: {
         showEquipment(){
@@ -92,10 +102,37 @@ export default {
             this.equipment.Names.splice(index, 1);
             this.saveEquipmentName();
         },
+        ChangeOrder(change){
+            if (!this.changeNeedToMove(this.equipment.Id, change))
+            {
+                return;
+            }
+            this.$http
+                .post(api.postChangeOrder + this.equipment.Id + "/" + change)
+                .then(
+                    function(response){
+                        this.getAllEquipments();
+                    },
+                    function(error){
+                        if (error !== undefined && error.data !== undefined && error.data.Errors !== undefined)
+                        {
+                            this.addErrorsToModal(error.data.Errors);
+                        } else {
+                            this.addErrorToModal(error);
+                        }
+                    }
+                )
+        }
     },
 }
 </script>
 
 <style>
-    
+.list-enter-active {
+    transition: all 0.8s;
+}
+.list-enter, .list-leave-to {
+    opacity: 0;
+    transform: translateX(-15px);
+}    
 </style>

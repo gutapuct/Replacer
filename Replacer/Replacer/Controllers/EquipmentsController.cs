@@ -92,5 +92,17 @@ namespace Replacer
             else
                 return Content(HttpStatusCode.BadRequest, resultMessage);
         }
+
+        [HttpPost]
+        [Route("~/api/equipment/order/{id}/{value}")]
+        public async Task<IHttpActionResult> ChangeOrder(string id, int value)
+        {
+            var resultMessage = await _model.ChangeOrder(id, value);
+
+            if (resultMessage.Errors.Count == 0)
+                return Ok();
+            else
+                return Content(HttpStatusCode.BadRequest, resultMessage);
+        }
     }
 }

@@ -109,7 +109,7 @@ namespace Replacer.Business
             {
                 await collection.UpdateOneAsync(
                     i => i.TypeName == equipment.TypeName,
-                    Builders<Equipment>.Update.Set(x => x.Names, equipment.Names.Where(i => i.Trim().Length > 0)));
+                    Builders<Equipment>.Update.Set(x => x.Names, equipment.Names.Where(i => i.Trim().Length > 0).Distinct()));
             }
             catch (Exception ex)
             {
@@ -145,7 +145,7 @@ namespace Replacer.Business
 
             try
             {
-                if (await collection.CountDocumentsAsync(i => i.TypeName == newTypeName) > 0)
+                if (await collection.CountDocumentsAsync(i => i.TypeName == newTypeName && i.Id != objectId) > 0)
                 {
                     resultMessage.Errors.Add("В списке уже есть оборудование с таким именем. Назовите иначе.");
                 }
@@ -173,6 +173,35 @@ namespace Replacer.Business
                 await collection.DeleteOneAsync(i => i.Id == objectId);
             }
             catch(Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+            return resultMessage;
+        }
+
+        public async Task<ResultMessage> ChangeOrder(string id, int value)
+        {
+            var resultMessage = new ResultMessage();
+            var objectId = new ObjectId(id);
+
+            try
+            {
+                var equipment = await (await collection.FindAsync(i => i.Id == objectId)).FirstOrDefaultAsync();
+                if (equipment == null)
+                {
+                    resultMessage.Errors.Add("Оборудование не найдено. Обратитесь к администратору.");
+                }
+                else
+                {
+                    await collection.UpdateManyAsync(
+                        i => i.Order == equipment.Order + value,
+                        Builders<Equipment>.Update.Inc(x => x.Order, -value));
+                    await collection.UpdateOneAsync(
+                        i => i.Id == objectId,
+                        Builders<Equipment>.Update.Inc(i => i.Order, value));
+                }
+            }
+            catch (Exception ex)
             {
                 resultMessage.AddErrorsFromException(ex);
             }

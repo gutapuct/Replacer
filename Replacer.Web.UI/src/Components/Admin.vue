@@ -29,6 +29,8 @@
                             :equipment="equipment"
                             :addErrorToModal="addErrorToModal"
                             :addErrorsToModal="addErrorsToModal"
+                            :changeNeedToMove="changeNeedToMove"
+                            :getAllEquipments="getAllEquipments"
                             ></EquipmentLine>
                     </b-list-group-item>
                 </b-list-group>
@@ -126,6 +128,15 @@ export default {
                 this.modalErrors.push(element);
             });
             this.toggleModal();
+        },
+        changeNeedToMove(id, change){
+            var currentOrder = this.equipments.find(el => el.Id === id);
+            
+            if (currentOrder === undefined) return false;
+            if (change === -1 && currentOrder.Order === 0) return false
+            if (change === 1 && currentOrder.Order === this.equipments.length - 1) return false
+            
+            return true;
         },
     },
     computed: {
