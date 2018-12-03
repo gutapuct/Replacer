@@ -8,7 +8,10 @@
                     src="../Content/images/Edit.png"
                     class="imgIcon24 pointer ml-3 mr-2"
                     @click="openChangeTypeName()" /> 
-                <img src="../Content/images/Delete.png" class="imgIcon24 pointer" />
+                <img
+                    src="../Content/images/Delete.png"
+                    class="imgIcon24 pointer"
+                    @click="deleteEquipment()" />
             </span>
             <span v-else>
                 <div>
@@ -150,6 +153,23 @@ export default {
                     }
                 )
             
+        },
+        deleteEquipment(){
+            this.$http
+                .delete(api.postDeleteEquipment + this.equipment.Id)
+                .then(
+                    function(response){
+                        this.$router.push('/admin');
+                    },
+                    function(error){
+                        if (error !== undefined && error.data !== undefined && error.data.Errors !== undefined)
+                        {
+                            this.addErrorsToModal(error.data.Errors);
+                        } else {
+                            this.addErrorToModal(error);
+                        }
+                    }
+                )
         },
     },
     computed: {

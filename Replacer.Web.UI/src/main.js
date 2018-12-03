@@ -16,7 +16,7 @@ Vue.use(VueResource);
 var router = new VueRouter({
   routes: [
     { path: '/', component: Replacer },
-    { path: '/admin', component: Admin },
+    { path: '/admin', name:"admin", component: Admin },
     { path: '/equipment/:id', name: "equipment", component: Equipment }
   ]
 })

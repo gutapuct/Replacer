@@ -63,7 +63,7 @@ namespace Replacer
         public async Task<IHttpActionResult> PostChangeReasons(string id, [FromBody]IEnumerable<Reason> reasons)
         {
             var resultMessage = await _model.ReplaceReasons(id, reasons);
-
+            
             if (resultMessage.Errors.Count == 0)
                 return Ok();
             else
@@ -75,6 +75,17 @@ namespace Replacer
         public async Task<IHttpActionResult> PostSaveTypeName(string id, string typeName)
         {
             var resultMessage = await _model.ReplaceTypeNameById(id, typeName);
+
+            if (resultMessage.Errors.Count == 0)
+                return Ok();
+            else
+                return Content(HttpStatusCode.BadRequest, resultMessage);
+        }
+
+        [HttpDelete]
+        public async Task<IHttpActionResult> DeleteAsync(string id)
+        {
+            var resultMessage = await _model.DeleteEquipment(id);
 
             if (resultMessage.Errors.Count == 0)
                 return Ok();

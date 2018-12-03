@@ -84,7 +84,8 @@ namespace Replacer.Business
                         {
                             TypeName = typeName,
                             Names = new List<string>() { typeName },
-                            Reasons = new List<Reason>()
+                            Reasons = new List<Reason>(),
+                            Order = (int)(await collection.EstimatedDocumentCountAsync())
                         });
                     }
                 }
@@ -154,6 +155,22 @@ namespace Replacer.Business
                         i => i.Id == objectId,
                         Builders<Equipment>.Update.Set(x => x.TypeName, newTypeName));
                 }
+            }
+            catch(Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+            return resultMessage;
+        }
+
+        public async Task<ResultMessage> DeleteEquipment(string id)
+        {
+            var resultMessage = new ResultMessage();
+            var objectId = new ObjectId(id);
+
+            try
+            {
+                await collection.DeleteOneAsync(i => i.Id == objectId);
             }
             catch(Exception ex)
             {
