@@ -4,7 +4,9 @@
             <Header btnName="Главная" btnUrl=""></Header>
             <ModalWindow :toggleModal="toggleModal" :modalShow="modalShow" :modalErrors="modalErrors"></ModalWindow>
             
-            <b-button variant="primary">Импорт</b-button>
+            <router-link :to="'/import'">
+                <b-button variant="primary">Импорт</b-button>
+            </router-link>
 
             <div class="row pt-3">
                 <div class="col-md-11">
