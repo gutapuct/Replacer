@@ -4,19 +4,19 @@
             <Header btnName="Главная" btnUrl=""></Header>
             <ModalWindow :toggleModal="toggleModal" :modalShow="modalShow" :modalErrors="modalErrors"></ModalWindow>
             
-            <router-link :to="'/import'">
+            <router-link :to="'/import'" class="ml-3">
                 <b-button variant="primary">Импорт</b-button>
             </router-link>
 
             <div class="row pt-3">
-                <div class="col-md-11">
+                <div class="col-md-10">
                     <b-form-input v-model="newValue"
                         type="text"
                         placeholder="Новое значение"
                     >
                     </b-form-input>
                 </div>
-                <div class="col-md-1">
+                <div class="col-md-2 textAlignRight">
                     <b-button class="btn btn-success" :disabled="getDisabledBtn" @click="addNewValue()">Добавить</b-button>
                 </div>
             </div>

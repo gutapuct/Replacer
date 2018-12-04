@@ -6,7 +6,6 @@
         <b-row>
             <b-col>
                 <b-file
-                    class="pointer"
                     accept=".xls, .xlsx"
                     v-model="pathToReason"
                     :state="checkFileType"
@@ -23,6 +22,7 @@
 
 <script>
 import Header from './Header.vue'
+import api from '../Content/scripts/Constants.js'
 
 export default {
     components: { Header },
@@ -33,12 +33,24 @@ export default {
     },
     methods: {
         startImport(){
-            
+            if (this.checkFileType){
+                let data = new FormData();
+                data.append('file', this.pathToReason);
+                this.$http
+                    .post(api.postImportDb, data)
+                    .then(
+                        function(){
+                            console.log("111111");
+                        },
+                        function(){
+                            console.log("222222");
+                        }
+                    )
+            }
         }
     },
     computed: {
         checkFileType(){
-            console.log(this.pathToReason);
             return this.pathToReason.name !== undefined
                    && this.pathToReason.name.length > 0
                    && (this.pathToReason.name.endsWith('.xls') || this.pathToReason.name.endsWith('xlsx'));

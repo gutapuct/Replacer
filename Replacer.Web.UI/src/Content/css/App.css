@@ -1,5 +1,4 @@
-html {
-    overflow: -moz-scrollbars-vertical; 
+body {
     overflow-y: scroll;
 }
 

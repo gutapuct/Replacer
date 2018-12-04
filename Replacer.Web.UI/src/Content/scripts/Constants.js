@@ -8,5 +8,6 @@ export default {
     postChangeReasons: server + 'equipment/reasons/',
     postSaveTypeName: server + 'equipment/typename/',
     postDeleteEquipment: server + 'equipments/',
-    postChangeOrder: server + "equipment/order/"
+    postChangeOrder: server + "equipment/order/",
+    postImportDb: server + "importdb",
 }

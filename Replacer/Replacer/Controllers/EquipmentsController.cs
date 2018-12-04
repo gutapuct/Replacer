@@ -1,10 +1,14 @@
-﻿using Replacer.Business;
+﻿using Newtonsoft.Json.Linq;
+using Replacer.Business;
 using Replacer.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -103,6 +107,29 @@ namespace Replacer
                 return Ok();
             else
                 return Content(HttpStatusCode.BadRequest, resultMessage);
+        }
+
+        [HttpPost]
+        [Route("~/api/importdb")]
+        public async Task<IHttpActionResult> ImportDb()
+        {
+            try
+            {
+                // C# api controller принять файл из input поля file
+                // http://qaru.site/questions/1210741/upload-file-using-webapi-ajax
+                var provider = new MultipartMemoryStreamProvider();
+                await Request.Content.ReadAsMultipartAsync(provider);
+
+                var fileNameParam = provider.Contents[0].Headers.ContentDisposition.Parameters.FirstOrDefault(p => p.Name.ToLower() == "filename");
+                string fileName = (fileNameParam == null) ? "" : fileNameParam.Value.Trim('"');
+                byte[] file = await provider.Contents[0].ReadAsByteArrayAsync();
+
+            }
+            catch (Exception ex)
+            {
+                
+            }
+            return Ok();
         }
     }
 }
