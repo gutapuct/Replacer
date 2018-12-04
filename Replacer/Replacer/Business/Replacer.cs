@@ -170,6 +170,11 @@ namespace Replacer.Business
 
             try
             {
+                var orderByDeletingEquipment = (await (await collection.FindAsync(i => i.Id == objectId)).SingleAsync()).Order;
+                await collection.UpdateManyAsync(
+                    i => i.Order > orderByDeletingEquipment,
+                    Builders<Equipment>.Update.Inc(k => k.Order, -1));
+
                 await collection.DeleteOneAsync(i => i.Id == objectId);
             }
             catch(Exception ex)

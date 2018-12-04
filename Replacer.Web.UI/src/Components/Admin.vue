@@ -54,7 +54,6 @@ export default {
             newValue: '',
             modalShow: false,
             modalErrors: [],
-            modalTitle: "Ошибка",
         }
     },
     created() {

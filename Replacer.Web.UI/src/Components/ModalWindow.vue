@@ -23,14 +23,14 @@
 <script>
 export default {
     props:{
-        modalShow: Boolean, //default = false
+        modalShow: Boolean,
         modalErrors: Array,
         modalTitle: String,
         toggleModal: Function
     },
     computed: {
         getModalTitle(){
-            return (this.modalTitle === undefined || this.modalTitle.length === 0) ? "Ошибка" : this.modalTitle;
+            return (this.modalTitle) ? this.modalTitle : "Ошибка";
         },
     },
 }

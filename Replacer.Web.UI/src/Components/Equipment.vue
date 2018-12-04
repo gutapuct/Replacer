@@ -60,6 +60,33 @@
                 class="imgIcon48 pointer mt-2 ml-3"
                 @click="addReason()" /> 
         </div>
+
+        <!-- Modal -->
+        <b-modal
+            v-model="modalQuestionShow"
+            :title="getTitle"
+            hide-header-close
+            no-close-on-esc
+            no-close-on-backdrop
+            centered
+            hide-footer
+            size="lg" 
+        >
+            <div class="d-block">
+                <b-row>
+                    <b-col v-html="getValue"></b-col>
+                </b-row>
+                <b-row class="text-center ml-1 mr-1 mt-4 mb-2">
+                    <b-col>
+                        <b-button class="width100" variant="outline-secondary" @click="toggleQuestionModal()">Отмена</b-button>
+                    </b-col>
+                    <b-col>
+                        <b-button class="width100" variant="danger" @click="okAction()">Удалить</b-button>
+                    </b-col>
+                </b-row>
+            </div>
+        </b-modal>
+
     </div>
 </template>
 
@@ -77,7 +104,7 @@ export default {
             inputForTypeName: false,
             modalShow: false,
             modalErrors: [],
-            modalTitle: "Ошибка",
+            modalQuestionShow: false,
         }
     },
     created() {
@@ -161,21 +188,7 @@ export default {
             
         },
         deleteEquipment(){
-            this.$http
-                .delete(api.postDeleteEquipment + this.equipment.Id)
-                .then(
-                    function(response){
-                        this.$router.push('/admin');
-                    },
-                    function(error){
-                        if (error !== undefined && error.data !== undefined && error.data.Errors !== undefined)
-                        {
-                            this.addErrorsToModal(error.data.Errors);
-                        } else {
-                            this.addErrorToModal(error);
-                        }
-                    }
-                )
+            this.toggleQuestionModal();
         },
         toggleModal(){
             if (this.modalShow) //if open
@@ -192,11 +205,38 @@ export default {
             });
             this.toggleModal();
         },
+        toggleQuestionModal(){
+            this.modalQuestionShow = !this.modalQuestionShow;
+        },
+        okAction(){
+            this.$http
+                .delete(api.postDeleteEquipment + this.equipment.Id)
+                .then(
+                    function(response){
+                        this.$router.push('/admin');
+                    },
+                    function(error){
+                        if (error !== undefined && error.data !== undefined && error.data.Errors !== undefined)
+                        {
+                            this.addErrorsToModal(error.data.Errors);
+                        } else {
+                            this.addErrorToModal(error);
+                        }
+                    }
+                )
+        },
     },
     computed: {
         checkTypeName(){
             return this.equipment.TypeName.trim().length > 0;
         },
+        getValue(){
+            return `Вы точно хотите удалить оборудование "${this.equipment.TypeName}"?<br>
+                    <strong>Вместе с оборудованием будут удалены и все причины с рекоммендациями!</strong>`;
+        },
+        getTitle(){
+            return `Удаление "${this.equipment.TypeName}"`;
+        }
     }
 }
 </script>
@@ -213,6 +253,9 @@ export default {
 .list-enter, .list-leave-to {
     opacity: 0;
     transform: translateX(-15px);
-} 
+}
+.width100{
+    width: 100%;
+}
 </style>
 
