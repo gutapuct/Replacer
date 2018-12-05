@@ -147,7 +147,9 @@ namespace Replacer.Business
 
             try
             {
-                if (await collection.CountDocumentsAsync(i => i.TypeName == newTypeName && i.Id != objectId) > 0)
+                if ((await collection.AsQueryable().ToListAsync())
+                    .Where(i => i.TypeName.ToLower().Trim() == newTypeName.Trim().ToLower() && i.Id != objectId)
+                    .Any())
                 {
                     resultMessage.Errors.Add("В списке уже есть оборудование с таким именем. Назовите иначе.");
                 }
@@ -217,12 +219,51 @@ namespace Replacer.Business
 
         public async Task<ResultMessage> ImportDb(HttpContent content)
         {
+            var equipmentsForSaving = new List<Equipment>();
+            var equipmentsForSkipping = new List<Equipment>();
             var resultMessage = new ResultMessage();
 
             try
             {
+                var equipmentsFromDb = (await collection.AsQueryable().ToListAsync()).Select(i => i.TypeName.ToLower()).ToList();
+                var currentOrder = equipmentsFromDb.Count;
+
                 var file = await GetFileByRequestContent(content);
                 var equipments = ExcelHelper.GetData(file).ToEquipments();
+
+                foreach (var equipment in equipments)
+                {
+                    if (equipmentsFromDb.Contains(equipment.TypeName.Trim().ToLower()))
+                    {
+                        equipmentsForSkipping.Add(equipment);
+                    }
+                    else
+                    {
+                        equipment.Order = currentOrder++;
+                        equipmentsForSaving.Add(equipment);
+                    }
+                }
+
+                var messages = new List<string>();
+                if (equipmentsForSaving.Any())
+                {
+                    await collection.InsertManyAsync(equipmentsForSaving);
+                    messages.Add($@"Ипортировано {equipmentsForSaving.Count} оборудования: {String.Join(", ", equipmentsForSaving.Select(i => i.TypeName))}.");
+                }
+                else
+                {
+                    messages.Add("Ничего не импортировано.");
+                }
+
+                if (equipmentsForSkipping.Any())
+                {
+                    equipmentsForSkipping.ForEach(eq =>
+                        messages.Add($@"Оборудование ""{eq.TypeName}"" не импортировалось, так как ранее уже содержалось в базе.")
+                    );
+                }
+
+                if (messages.Any())
+                    resultMessage.Object = messages;
             }
             catch (Exception ex)
             {

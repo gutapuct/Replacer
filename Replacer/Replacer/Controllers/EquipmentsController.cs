@@ -116,7 +116,7 @@ namespace Replacer
             var resultMessage = await _model.ImportDb(Request.Content);
 
             if (resultMessage.Errors.Count == 0)
-                return Ok();
+                return Ok(resultMessage);
             else
                 return Content(HttpStatusCode.BadRequest, resultMessage);
         }

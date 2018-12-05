@@ -15,17 +15,15 @@ namespace Replacer.Models
             for (var line = 0; line < data.GetLength(1); line++)
             {
                 if (String.IsNullOrWhiteSpace(data[0, line]))
-                {
                     continue;
-                }
 
-                var names = data[0, line].Split('|');
-                var equipment = new Equipment
-                {
-                    Names = names.Select(i => i.Trim()).Distinct().ToList(),
-                    Reasons = new List<Reason>()
-                };
-                equipment.TypeName = equipment.Names[0];
+                var names = data[0, line]
+                    .Split('|')
+                    .Select(i => i.Trim())
+                    .Distinct()
+                    .ToList();
+
+                var reasons = new List<Reason>();
 
                 for (var column = 1; column < data.GetLength(0); column++)
                 {
@@ -39,7 +37,6 @@ namespace Replacer.Models
                             {
                                 NameReason = reasonAndRecommendation[0].Trim(),
                                 NameRecommendation = reasonAndRecommendation[1].Trim(),
-                                WasUsed = false
                             });
                         }
                     }
@@ -48,8 +45,9 @@ namespace Replacer.Models
                 {
                     result.Add(new Equipment
                     {
-                        //NamesOfEquipment = data[0, line].Split('|').Select(i => i = i.ToLower()).ToArray(),
-                        //Reasons = reasons
+                        Names = names,
+                        TypeName = names[0],
+                        Reasons = reasons,
                     });
                 }
             }
