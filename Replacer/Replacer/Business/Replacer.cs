@@ -8,6 +8,8 @@ using MongoDB.Driver;
 using System.Configuration;
 using Replacer.Models;
 using Replacer.Extensions;
+using System.Net.Http;
+using System.IO;
 
 namespace Replacer.Business
 {
@@ -212,5 +214,36 @@ namespace Replacer.Business
             }
             return resultMessage;
         }
+
+        public async Task<ResultMessage> ImportDb(HttpContent content)
+        {
+            var resultMessage = new ResultMessage();
+
+            try
+            {
+                var file = await GetFileByRequestContent(content);
+                var equipments = ExcelHelper.GetData(file).ToEquipments();
+            }
+            catch (Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+            return resultMessage;
+        }
+
+        private async Task<FileModel> GetFileByRequestContent(HttpContent content)
+        {
+            var provider = new MultipartMemoryStreamProvider();
+            await content.ReadAsMultipartAsync(provider);
+
+            var fileNameParam = provider.Contents[0].Headers.ContentDisposition.Parameters.FirstOrDefault(p => p.Name.ToLower() == "filename");
+
+            return new FileModel
+            {
+                Data = await provider.Contents[0].ReadAsByteArrayAsync(),
+                FileName = (fileNameParam == null) ? "" : fileNameParam.Value.Trim('"')
+            };
+        }
+
     }
 }

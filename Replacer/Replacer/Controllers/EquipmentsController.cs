@@ -113,23 +113,12 @@ namespace Replacer
         [Route("~/api/importdb")]
         public async Task<IHttpActionResult> ImportDb()
         {
-            try
-            {
-                // C# api controller принять файл из input поля file
-                // http://qaru.site/questions/1210741/upload-file-using-webapi-ajax
-                var provider = new MultipartMemoryStreamProvider();
-                await Request.Content.ReadAsMultipartAsync(provider);
+            var resultMessage = await _model.ImportDb(Request.Content);
 
-                var fileNameParam = provider.Contents[0].Headers.ContentDisposition.Parameters.FirstOrDefault(p => p.Name.ToLower() == "filename");
-                string fileName = (fileNameParam == null) ? "" : fileNameParam.Value.Trim('"');
-                byte[] file = await provider.Contents[0].ReadAsByteArrayAsync();
-
-            }
-            catch (Exception ex)
-            {
-                
-            }
-            return Ok();
+            if (resultMessage.Errors.Count == 0)
+                return Ok();
+            else
+                return Content(HttpStatusCode.BadRequest, resultMessage);
         }
     }
 }
