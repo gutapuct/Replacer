@@ -22,6 +22,7 @@ namespace Replacer.Models
             //Book
             var workBookExcel = excelApp.Workbooks.Open(path);
 
+
             //Table
             var workSheetExcel = (Microsoft.Office.Interop.Excel.Worksheet)workBookExcel.Sheets[1];
 
@@ -48,7 +49,7 @@ namespace Replacer.Models
 
         private static string GetPathToTempFile(FileModel file)
         {
-            var fullName = $"{Environment.CurrentDirectory}\\{new Random().Next(100000, 1000000)}_{file.FileName}"; 
+            var fullName = Path.GetTempFileName();
             File.WriteAllBytes(fullName, file.Data);
 
             return fullName;
