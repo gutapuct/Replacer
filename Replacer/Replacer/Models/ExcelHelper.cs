@@ -1,4 +1,6 @@
 ﻿using ExcelDataReader;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net.Http;
@@ -8,14 +10,17 @@ namespace Replacer.Models
 {
     public static class ExcelHelper
     {
-        public static async Task<DataTable> GetData(HttpContent content)
+        public static async Task<DataTable> GetDataExcelAsync(HttpContent content, MultipartMemoryStreamProvider provider = null, int numberDoc = 0)
         {
-            var provider = new MultipartMemoryStreamProvider();
-            await content.ReadAsMultipartAsync(provider);
+            if (provider == null)
+            {
+                provider = new MultipartMemoryStreamProvider();
+                await content.ReadAsMultipartAsync(provider);
+            }
 
-            var fileNameParam = provider.Contents[0].Headers.ContentDisposition.Parameters.FirstOrDefault(p => p.Name.ToLower() == "filename");
+            var fileNameParam = provider.Contents[numberDoc].Headers.ContentDisposition.Parameters.FirstOrDefault(p => p.Name.ToLower() == "filename");
 
-            using (var stream = await provider.Contents[0].ReadAsStreamAsync())
+            using (var stream = await provider.Contents[numberDoc].ReadAsStreamAsync())
             {
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {

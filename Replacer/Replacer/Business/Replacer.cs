@@ -10,6 +10,7 @@ using Replacer.Models;
 using Replacer.Extensions;
 using System.Net.Http;
 using System.Data;
+using System.IO;
 
 namespace Replacer.Business
 {
@@ -32,7 +33,7 @@ namespace Replacer.Business
             var resultMessage = new ResultMessage();
             try
             {
-                resultMessage.Object = await collection.AsQueryable().ToEquipmentShotModel();
+                resultMessage.Object = await collection.AsQueryable().ToEquipmentShotModelAsync();
             }
             catch (Exception ex)
             {
@@ -41,7 +42,7 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        public async Task<ResultMessage> GetEquipmentById(string id)
+        public async Task<ResultMessage> GetEquipmentByIdAsync(string id)
         {
             var resultMessage = new ResultMessage();
             var objectId = new ObjectId(id);
@@ -103,7 +104,7 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        public async Task<ResultMessage> ReplaceNames(EquipmentShot equipment)
+        public async Task<ResultMessage> ReplaceNamesAsync(EquipmentShot equipment)
         {
             var resultMessage = new ResultMessage();
 
@@ -120,7 +121,7 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        public async Task<ResultMessage> ReplaceReasons(string id, IEnumerable<Reason> reasons)
+        public async Task<ResultMessage> ReplaceReasonsAsync(string id, IEnumerable<Reason> reasons)
         {
             var resultMessage = new ResultMessage();
             var objectId = new ObjectId(id);
@@ -140,7 +141,7 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        public async Task<ResultMessage> ReplaceTypeNameById(string id, string newTypeName)
+        public async Task<ResultMessage> ReplaceTypeNameByIdAsync(string id, string newTypeName)
         {
             var resultMessage = new ResultMessage();
             var objectId = new ObjectId(id);
@@ -167,7 +168,7 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        public async Task<ResultMessage> DeleteEquipment(string id)
+        public async Task<ResultMessage> DeleteEquipmentAsync(string id)
         {
             var resultMessage = new ResultMessage();
             var objectId = new ObjectId(id);
@@ -188,7 +189,7 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        public async Task<ResultMessage> ChangeOrder(string id, int value)
+        public async Task<ResultMessage> ChangeOrderAsync(string id, int value)
         {
             var resultMessage = new ResultMessage();
             var objectId = new ObjectId(id);
@@ -217,7 +218,7 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        public async Task<ResultMessage> ImportDb(HttpContent content)
+        public async Task<ResultMessage> ImportDbAsync(HttpContent content)
         {
             var equipmentsForSaving = new List<Equipment>();
             var equipmentsForSkipping = new List<Equipment>();
@@ -228,7 +229,7 @@ namespace Replacer.Business
                 var equipmentsFromDb = (await collection.AsQueryable().ToListAsync()).Select(i => i.TypeName.ToLower()).ToList();
                 var currentOrder = equipmentsFromDb.Count;
 
-                var equipments = (await ExcelHelper.GetData(content)).ToEquipments();
+                var equipments = (await ExcelHelper.GetDataExcelAsync(content)).ToEquipmentsAsync();
 
                 foreach (var equipment in equipments)
                 {
@@ -271,7 +272,28 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        
+        public async Task<ResultMessage> StartAsync(HttpContent content)
+        {
+            var resultMessage = new ResultMessage();
+            var pathToTempFolder = $"{Environment.CurrentDirectory.Split(':')[0]}:\\temp\\{Guid.NewGuid().ToString()}";
+
+            try
+            {
+                var equipments = collection.AsQueryable().ToList();
+                await WordHelper.CreateAllActsAsync(content, pathToTempFolder, equipments);
+                var files = FileHelper.GetStreamAllFiles(pathToTempFolder);
+                FileHelper.SaveNewFile(files);
+            }
+            catch (Exception ex)
+            {
+                resultMessage.AddErrorsFromException(ex);
+            }
+            finally
+            {
+                FileHelper.DeleteDirectoryAndFilesInThat(pathToTempFolder);
+            }
+            return resultMessage;
+        }
 
     }
 }

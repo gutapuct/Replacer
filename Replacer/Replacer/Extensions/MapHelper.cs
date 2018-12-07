@@ -8,7 +8,7 @@ namespace Replacer.Extensions
 {
     public static class MapHelper
     {
-        public async static Task<IEnumerable<EquipmentShot>> ToEquipmentShotModel(this MongoDB.Driver.Linq.IMongoQueryable<Equipment> equipments)
+        public async static Task<IEnumerable<EquipmentShot>> ToEquipmentShotModelAsync(this MongoDB.Driver.Linq.IMongoQueryable<Equipment> equipments)
         {
             var result = new List<EquipmentShot>();
             var list = await equipments.ToListAsync();

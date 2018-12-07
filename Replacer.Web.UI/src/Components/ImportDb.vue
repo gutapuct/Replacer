@@ -17,7 +17,7 @@
             <b-col>
                 <b-file
                     accept=".xls, .xlsx"
-                    v-model="pathToReason"
+                    v-model="file"
                     :state="checkFileType"
                     placeholder="Выберите файл..."></b-file>
             </b-col>
@@ -39,7 +39,7 @@ export default {
     components: { Header, ModalWindow },
     data() {
         return{
-            pathToReason: { },
+            file: { },
             modalShow: false,
             modalErrors: [],
             modalQuestionShow: false,
@@ -54,7 +54,7 @@ export default {
                 this.loadingShow = true
                 this.btnDisabled = true;
                 let data = new FormData();
-                data.append('file', this.pathToReason);
+                data.append('file', this.file);
 
                 this.$http
                     .post(api.postImportDb, data)
@@ -101,10 +101,10 @@ export default {
     },
     computed: {
         checkFileType(){
-            return this.pathToReason.name !== undefined
+            return this.file.name !== undefined
                    && !this.btnDisabled
-                   && this.pathToReason.name.length > 0
-                   && (this.pathToReason.name.endsWith('.xls') || this.pathToReason.name.endsWith('xlsx'));
+                   && this.file.name.length > 0
+                   && (this.file.name.endsWith('.xls') || this.file.name.endsWith('xlsx'));
         }
     },
 }
@@ -122,16 +122,11 @@ export default {
 
 #ImportDb .loading img{
     width: 25%;
-    height: 30%;
     position: absolute;
     margin: auto;
     left: 0;
     top: 0;
     bottom: 0;
     right: 0;
-}
-
-.backdrop {
-  transition: all 0.4s ease;
 }
 </style>

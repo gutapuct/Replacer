@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Replacer.Models
 {
     public static class ReasonHelper
     {
-        public static IEnumerable<Equipment> ToEquipments(this DataTable data)
+        public static IEnumerable<Equipment> ToEquipmentsAsync(this DataTable data)
         {
             var result = new List<Equipment>();
 
@@ -55,6 +56,34 @@ namespace Replacer.Models
             }
 
             return result;
+        }
+
+        public static Reason GetReasonByEquipmentName(List<Equipment> equipments, string equipmentName)
+        {
+            Equipment equipment = null;
+            equipmentName = equipmentName.ToLower().Trim();
+
+            foreach (var el in equipments)
+            {
+                if (el.Names.Where(i => equipmentName.Trim().ToLower().IndexOf(i.Trim().ToLower()) >= 0).Any())
+                {
+                    equipment = el;
+                    break;
+                }
+            }
+
+            if (equipment == null)
+                return new Reason();
+
+            var reason = equipment.Reasons.Where(i => !i.WasUsed).FirstOrDefault();
+            if (reason == null)
+            {
+                equipment.Reasons.ForEach(i => i.WasUsed = false);
+                reason = equipment.Reasons[0];
+            }
+
+            reason.WasUsed = true;
+            return reason;
         }
     }
 }
