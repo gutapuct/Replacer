@@ -189,6 +189,7 @@
     <Compile Include="Models\ReasonHelper.cs" />
     <Compile Include="Models\ResultMessage.cs" />
     <Compile Include="Models\WordHelper.cs" />
+    <Compile Include="Models\WorkResultInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />

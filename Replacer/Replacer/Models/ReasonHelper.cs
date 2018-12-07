@@ -58,14 +58,14 @@ namespace Replacer.Models
             return result;
         }
 
-        public static Reason GetReasonByEquipmentName(List<Equipment> equipments, string equipmentName)
+        public static Reason GetReasonByEquipmentName(List<Equipment> equipments, string equipmentName, WorkResultInfo resultInfo, int numberLine)
         {
             Equipment equipment = null;
             equipmentName = equipmentName.ToLower().Trim();
 
             foreach (var el in equipments)
             {
-                if (el.Names.Where(i => equipmentName.Trim().ToLower().IndexOf(i.Trim().ToLower()) >= 0).Any())
+                if (el.Names.Where(i => !String.IsNullOrWhiteSpace(i) && equipmentName.Trim().ToLower().IndexOf(i.Trim().ToLower()) >= 0).Any())
                 {
                     equipment = el;
                     break;
@@ -73,7 +73,10 @@ namespace Replacer.Models
             }
 
             if (equipment == null)
+            {
+                resultInfo.Errors.Add($"Причина и рекомендация не найдена для строки №{numberLine + 1} ({equipmentName})");
                 return new Reason();
+            }
 
             var reason = equipment.Reasons.Where(i => !i.WasUsed).FirstOrDefault();
             if (reason == null)

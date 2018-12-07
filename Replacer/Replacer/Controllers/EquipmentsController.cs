@@ -125,7 +125,6 @@ namespace Replacer
             var resultMessage = await _model.StartAsync(Request.Content);
 
             if (resultMessage.Errors.Count == 0)
-                //TODO: Add info about count (success and fail, which lines)
                 return Ok(resultMessage.Object); 
             else
                 return Content(HttpStatusCode.BadRequest, resultMessage);

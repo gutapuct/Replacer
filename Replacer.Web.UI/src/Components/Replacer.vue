@@ -98,10 +98,10 @@ export default {
                 .then(
                     function(response){
                         this.modalTitle = "Импорт завершен";
-                        // TODO show info
-                        console.log(response);
                         this.loadingShow = false;
-                        this.addErrorToModal("Импорт завершен!");
+                        var results = response.data.Errors;
+                        results.unshift("Создано актов: " + response.data.CountActs);
+                        this.addErrorsToModal(results);
                     },
                     function(error){
                         this.modalTitle = "Ошибка";

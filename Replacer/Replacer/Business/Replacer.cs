@@ -233,6 +233,7 @@ namespace Replacer.Business
 
                 foreach (var equipment in equipments)
                 {
+                    equipment.Names = equipment.Names.Where(i => !String.IsNullOrWhiteSpace(i)).ToList();
                     if (equipmentsFromDb.Contains(equipment.TypeName.Trim().ToLower()))
                     {
                         equipmentsForSkipping.Add(equipment);
@@ -276,11 +277,17 @@ namespace Replacer.Business
         {
             var resultMessage = new ResultMessage();
             var pathToTempFolder = $"{Environment.CurrentDirectory.Split(':')[0]}:\\temp\\{Guid.NewGuid().ToString()}";
+            var resultInfo = new WorkResultInfo()
+            {
+                CountActs = 0,
+                Errors = new List<string>(),
+            };
+            resultMessage.Object = resultInfo;
 
             try
             {
                 var equipments = collection.AsQueryable().ToList();
-                await WordHelper.CreateAllActsAsync(content, pathToTempFolder, equipments);
+                await WordHelper.CreateAllActsAsync(content, pathToTempFolder, equipments, resultInfo);
                 var files = FileHelper.GetStreamAllFiles(pathToTempFolder);
                 FileHelper.SaveNewFile(files);
             }

@@ -17,8 +17,9 @@ namespace Replacer.Models
         public static string FolderForTemplate = "FolderForTemplate";
         private static object LockObject = new object();
 
-        public async static Task CreateAllActsAsync(HttpContent content, string pathToTempFolder, List<Equipment> equipments)
+        public async static Task CreateAllActsAsync(HttpContent content, string pathToTempFolder, List<Equipment> equipments, WorkResultInfo resultInfo)
         {
+            var hasError = false;
             var provider = new MultipartMemoryStreamProvider();
             await content.ReadAsMultipartAsync(provider);
 
@@ -70,16 +71,13 @@ namespace Replacer.Models
                     if (pairsForReplacings.ContainsKey("Name") || pairsForReplacings.ContainsKey("name"))
                     {
                         var equipmentName = pairsForReplacings.ContainsKey("Name") ? pairsForReplacings["Name"] : pairsForReplacings["name"];
-                        var reason = ReasonHelper.GetReasonByEquipmentName(equipments, equipmentName);
+                        var reason = ReasonHelper.GetReasonByEquipmentName(equipments, equipmentName, resultInfo, value);
                         pairsForReplacings.Add("reason", reason.NameReason);
                         pairsForReplacings.Add("recommendation", reason.NameRecommendation);
                     }
-                    else
+                    else if(!hasError)
                     {
-                        //TODO
-                        //Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        //Console.WriteLine("We couldn't find the column named \"Name\" or \"name\". The reasins will not be replaced!");
-                        //Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        resultInfo.Errors.Add(@"We couldn't find the column named ""Name"" or ""name"". The reasons will not be replaced!");
                     }
 
                     using (var doc = WordprocessingDocument.Open(copyPath, true))
@@ -105,6 +103,7 @@ namespace Replacer.Models
                         doc.MainDocumentPart.Document.Save();
                     }
                 }
+                resultInfo.CountActs = values.Rows.Count - 1;
             }
         }
 
