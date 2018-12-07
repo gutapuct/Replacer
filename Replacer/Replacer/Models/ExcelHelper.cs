@@ -1,58 +1,28 @@
-﻿using Replacer.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using ExcelDataReader;
+using System.Data;
 using System.Linq;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Replacer.Models
 {
     public static class ExcelHelper
     {
-        public static string[,] GetData(FileModel file)
+        public static async Task<DataTable> GetData(HttpContent content)
         {
-            var path = GetPathToTempFile(file);
+            var provider = new MultipartMemoryStreamProvider();
+            await content.ReadAsMultipartAsync(provider);
 
-            if (String.IsNullOrWhiteSpace(path))
-                throw new Exception("Возникли проблемы с созданием временного файла excel. Обратитесь к администратору");
-            
-            var excelApp = new Microsoft.Office.Interop.Excel.Application();
+            var fileNameParam = provider.Contents[0].Headers.ContentDisposition.Parameters.FirstOrDefault(p => p.Name.ToLower() == "filename");
 
-            //Book
-            var workBookExcel = excelApp.Workbooks.Open(path);
-
-
-            //Table
-            var workSheetExcel = (Microsoft.Office.Interop.Excel.Worksheet)workBookExcel.Sheets[1];
-
-            var lastCell = workSheetExcel.Cells.SpecialCells(Microsoft.Office.Interop.Excel.XlCellType.xlCellTypeLastCell);
-            var result = new string[lastCell.Column, lastCell.Row];
-
-            for (int i = 0; i < (int)lastCell.Column; i++)
+            using (var stream = await provider.Contents[0].ReadAsStreamAsync())
             {
-                for (int j = 0; j < (int)lastCell.Row; j++)
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
-                    result[i, j] = workSheetExcel.Cells[j + 1, i + 1].Text.ToString();
+                    DataSet result = reader.AsDataSet();
+                    return result.Tables[0];
                 }
             }
-
-            workBookExcel.Close(false, Type.Missing, Type.Missing); // Close without save
-            excelApp.Quit(); // Exit from Excel
-            GC.Collect(); // Remove your trash
-
-            if (File.Exists(path))
-                File.Delete(path); //Remove temp Excel file
-
-            return result;
-        }
-
-        private static string GetPathToTempFile(FileModel file)
-        {
-            var fullName = Path.GetTempFileName();
-            File.WriteAllBytes(fullName, file.Data);
-
-            return fullName;
         }
     }
 }

@@ -9,7 +9,7 @@ using System.Configuration;
 using Replacer.Models;
 using Replacer.Extensions;
 using System.Net.Http;
-using System.IO;
+using System.Data;
 
 namespace Replacer.Business
 {
@@ -228,8 +228,7 @@ namespace Replacer.Business
                 var equipmentsFromDb = (await collection.AsQueryable().ToListAsync()).Select(i => i.TypeName.ToLower()).ToList();
                 var currentOrder = equipmentsFromDb.Count;
 
-                var file = await GetFileByRequestContent(content);
-                var equipments = ExcelHelper.GetData(file).ToEquipments();
+                var equipments = (await ExcelHelper.GetData(content)).ToEquipments();
 
                 foreach (var equipment in equipments)
                 {
@@ -272,19 +271,7 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        private async Task<FileModel> GetFileByRequestContent(HttpContent content)
-        {
-            var provider = new MultipartMemoryStreamProvider();
-            await content.ReadAsMultipartAsync(provider);
-
-            var fileNameParam = provider.Contents[0].Headers.ContentDisposition.Parameters.FirstOrDefault(p => p.Name.ToLower() == "filename");
-
-            return new FileModel
-            {
-                Data = await provider.Contents[0].ReadAsByteArrayAsync(),
-                FileName = (fileNameParam == null) ? "" : fileNameParam.Value.Trim('"')
-            };
-        }
+        
 
     }
 }

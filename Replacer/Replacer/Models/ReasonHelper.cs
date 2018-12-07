@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,16 +9,17 @@ namespace Replacer.Models
 {
     public static class ReasonHelper
     {
-        public static IEnumerable<Equipment> ToEquipments(this string[,] data)
+        public static IEnumerable<Equipment> ToEquipments(this DataTable data)
         {
             var result = new List<Equipment>();
 
-            for (var line = 0; line < data.GetLength(1); line++)
+            foreach (DataRow row in data.Rows)
             {
-                if (String.IsNullOrWhiteSpace(data[0, line]))
+                if (row.ItemArray.Length == 0 || String.IsNullOrWhiteSpace(row.ItemArray[0].ToString()))
                     continue;
 
-                var names = data[0, line]
+                var names = row.ItemArray[0]
+                    .ToString()
                     .Split('|')
                     .Select(i => i.Trim())
                     .Distinct()
@@ -25,9 +27,9 @@ namespace Replacer.Models
 
                 var reasons = new List<Reason>();
 
-                for (var column = 1; column < data.GetLength(0); column++)
+                for (var column = 1; column < row.ItemArray.Length; column++)
                 {
-                    var reason = data[column, line];
+                    var reason = row.ItemArray[column].ToString();
                     if (!String.IsNullOrWhiteSpace(reason))
                     {
                         var reasonAndRecommendation = reason.Split('|');
