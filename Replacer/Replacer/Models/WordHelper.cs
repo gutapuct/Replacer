@@ -28,6 +28,7 @@ namespace Replacer.Models
             {
                 for (var value = 1; value < values.Rows.Count; value++)
                 {
+                    //TODO
                     //if (value % 5 == 0)
                     //{
                     //    Console.Write(".");
@@ -75,6 +76,7 @@ namespace Replacer.Models
                     }
                     else
                     {
+                        //TODO
                         //Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         //Console.WriteLine("We couldn't find the column named \"Name\" or \"name\". The reasins will not be replaced!");
                         //Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

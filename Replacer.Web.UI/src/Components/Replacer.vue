@@ -9,6 +9,7 @@
         </transition>
 
         <div>
+            <!-- TODO -->
             <b-row class="pb-5">Добро пожаловать в Replacer</b-row>
             <b-row class="pt-5">Путь к шаблону:</b-row>
             <b-row>
@@ -72,6 +73,7 @@ export default {
                 .post(api.postStart, data)
                 .then(
                     function(response){
+                        // TODO
                         console.log(response);
                         this.loadingShow = false;
                         this.addErrorToModal("Импорт завершен!");
