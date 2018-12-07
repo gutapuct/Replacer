@@ -20,6 +20,8 @@ namespace Replacer
             //config.Formatters.JsonFormatter.UseDataContractJsonSerializer = false;
             config.MapHttpAttributeRoutes();
 
+            //TODO: connect SignalR
+
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",

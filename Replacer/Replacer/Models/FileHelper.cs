@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -48,8 +49,15 @@ namespace Replacer.Models
             var result = OpenAndCombine(files);
 
             var date = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss.ffff");
-            //TODO (Where save a new file
-            var filePath = $"{Environment.CurrentDirectory.Split(':')[0]}:\\Acts {date}.docx";
+            var folderToSaveFile = ConfigurationManager.AppSettings.Get("PathToSaveFile");
+
+            if (String.IsNullOrWhiteSpace(folderToSaveFile))
+                folderToSaveFile = "C:\\";
+
+            if (!Directory.Exists(folderToSaveFile))
+                Directory.CreateDirectory(folderToSaveFile);
+
+            var filePath = $"{folderToSaveFile}\\Acts {date}.docx";
 
             using (var newFile = File.Create(filePath)) { }
             File.WriteAllBytes(filePath, result);

@@ -1,7 +1,14 @@
 <template>
     <div class="container pt-3" id="replacer">
         <Header btnName="Настройки" btnUrl="admin"></Header>
-        <ModalWindow :toggleModal="toggleModal" :modalShow="modalShow" :modalErrors="modalErrors"></ModalWindow>
+        <ModalWindow
+            :toggleModal="toggleModal"
+            :modalShow="modalShow"
+            :modalErrors="modalErrors"
+            :btnClick="goToMainPage"
+            size="lg"
+            :modalTitle="modalTitle"></ModalWindow>
+
         <transition name="fade" mode="out-in">
             <div class="loading" v-if="loadingShow">
                 <img src="../Content/images/loading.gif" />
@@ -9,16 +16,32 @@
         </transition>
 
         <div>
-            <!-- TODO -->
-            <b-row class="pb-5">Добро пожаловать в Replacer</b-row>
-            <b-row class="pt-5">Путь к шаблону:</b-row>
+            <div id="hello">
+                <h2>
+                    <span>Добро пожаловать в <u><i>REPLACER</i></u></span>
+                </h2>
+            </div>
+            <b-row class="pl-4 pt-2 pb-2"><strong>Путь к шаблону:</strong></b-row>
             <b-row>
-                <b-file v-model="fileTemplate" :state="checkFormTemplate" placeholder="Выберите файл..."></b-file>
+                <b-file
+                    accept=".doc, .docx"
+                    v-model="fileTemplate"
+                    :state="checkFormTemplate"
+                    placeholder="Выберите файл..."></b-file>
             </b-row>
             <transition name="fade" mode="out-in">
-                <b-row class="pt-5" v-show="checkFormTemplate || checkFormValues">Путь к значениям:
-                    <b-file v-model="fileValues" :state="checkFormValues" placeholder="Выберите файл..."></b-file>
-                </b-row>
+                <div v-show="checkFormTemplate || checkFormValues">
+                    <b-row class="pl-4 pt-5 pb-2">
+                        <strong>Путь к значениям:</strong>
+                    </b-row>
+                    <b-row>
+                        <b-file
+                            accept=".xls, .xlsx"                        
+                            v-model="fileValues"
+                            :state="checkFormValues"
+                            placeholder="Выберите файл..."></b-file>
+                    </b-row>
+                </div>
             </transition>
             <transition name="fade" mode="out-in">
                 <b-row v-show="showBtnStart" class="pt-5">
@@ -45,6 +68,7 @@ export default {
             modalErrors: [],
             btnDisabled: true,
             loadingShow: false,
+            modalTitle: "Ошибка"
         }
     },
     methods: {
@@ -73,12 +97,14 @@ export default {
                 .post(api.postStart, data)
                 .then(
                     function(response){
-                        // TODO
+                        this.modalTitle = "Импорт завершен";
+                        // TODO show info
                         console.log(response);
                         this.loadingShow = false;
                         this.addErrorToModal("Импорт завершен!");
                     },
                     function(error){
+                        this.modalTitle = "Ошибка";
                         this.loadingShow = false;
                         if (error && error.data && error.data.Errors)
                         {
@@ -89,6 +115,9 @@ export default {
                     }
                 )
         },
+        goToMainPage(){
+            document.location.reload();
+        }
     },
     computed: {
         checkFormTemplate(){
@@ -125,5 +154,17 @@ export default {
     bottom: 0;
     right: 0;
     z-index: 100;
+}
+
+#hello{
+    text-align: center;
+    margin-bottom: 24px;
+    margin-top: 32px;
+}
+
+#hello span{
+    border: 5px solid rgb(118, 96, 245);
+    border-radius: 15px;
+    padding: 10px;
 }
 </style>

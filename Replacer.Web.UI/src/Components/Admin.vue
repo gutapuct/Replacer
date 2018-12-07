@@ -28,6 +28,7 @@
                         :key="index"
                         class="mt-1 mb-1"
                     >
+                        <!-- TODO Pagination -->
                         <EquipmentLine
                             :equipment="equipment"
                             :addErrorToModal="addErrorToModal"
