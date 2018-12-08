@@ -93,6 +93,7 @@ export default {
             data.append('fileTemplate', this.fileTemplate);
             data.append('fileValues', this.fileValues);
 
+            // TODO Check timeout
             this.$http
                 .post(api.postStart, data)
                 .then(

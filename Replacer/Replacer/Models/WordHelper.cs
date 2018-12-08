@@ -29,14 +29,15 @@ namespace Replacer.Models
             {
                 for (var value = 1; value < values.Rows.Count; value++)
                 {
-                    //TODO
+                    //TODO: logs for SignalR
                     //if (value % 5 == 0)
                     //{
                     //    Console.Write(".");
                     //}
 
-                    System.Threading.Thread.Sleep(10);
-                    var copyPath = $"{pathToTempFolder}\\{value}.docx";
+                    System.Threading.Thread.Sleep(1);
+                    var date = DateTime.Now.ToString("yyyyMMddhhmmssffff");
+                    var copyPath = $"{pathToTempFolder}\\{date}_{value}.docx";
 
                     lock (LockObject)
                     {
