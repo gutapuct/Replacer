@@ -81,10 +81,11 @@ namespace Replacer.Models
 
                     for (pointer = 1; pointer < documents.Count; pointer++)
                     {
-                        if (pointer % 5 == 0)
-                        {
-                            Console.Write(".");
-                        }
+                        //TODO: connect SignalR
+                        //if (pointer % 5 == 0)
+                        //{
+                        //    Console.Write(".");
+                        //}
 
                         WordprocessingDocument tempDocument = WordprocessingDocument.Open(new MemoryStream(documents[pointer]), true);
                         XElement tempBody = XElement.Parse(tempDocument.MainDocumentPart.Document.Body.OuterXml);
@@ -98,11 +99,13 @@ namespace Replacer.Models
             }
             catch (OpenXmlPackageException oxmle)
             {
-                Console.WriteLine($"Error while merging files: Document index {0}. {oxmle.Message}");
+                // TODO: connect SignalR
+                // Console.WriteLine($"Error while merging files: Document index {0}. {oxmle.Message}");
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error while merging files: Document index {0}. {e.Message}");
+                // TODO: connect SignalR
+                // Console.WriteLine($"Error while merging files: Document index {0}. {e.Message}");
             }
             finally
             {
