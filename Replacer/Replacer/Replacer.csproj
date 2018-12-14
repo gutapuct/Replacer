@@ -196,7 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\SwaggerConfig.cs" />
-    <Compile Include="Hubs\ChatHub.cs" />
+    <Compile Include="Hubs\HubWebReporter.cs" />
     <Compile Include="Models\ExcelHelper.cs" />
     <Compile Include="Business\Replacer.cs" />
     <Compile Include="Controllers\EquipmentsController.cs" />
@@ -206,7 +206,7 @@
     <Compile Include="Models\Reason.cs" />
     <Compile Include="Models\ReasonHelper.cs" />
     <Compile Include="Models\ResultMessage.cs" />
-    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\WebReporter.cs" />
     <Compile Include="Models\WordHelper.cs" />
     <Compile Include="Models\WorkResultInfo.cs" />
     <Compile Include="Program.cs" />
