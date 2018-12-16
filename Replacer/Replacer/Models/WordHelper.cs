@@ -27,13 +27,12 @@ namespace Replacer.Models
 
             using (var stream = await provider.Contents[0].ReadAsStreamAsync())
             {
-                for (var value = 1; value < values.Rows.Count; value++)
+                var reporter = new WebReporter();
+                var rowsCount = values.Rows.Count;
+
+                for (var value = 1; value < rowsCount; value++)
                 {
-                    //TODO: logs for SignalR
-                    //if (value % 5 == 0)
-                    //{
-                    //    Console.Write(".");
-                    //}
+                    reporter.SendProgress(rowsCount-1, value);
 
                     System.Threading.Thread.Sleep(1);
                     var date = DateTime.Now.ToString("yyyyMMddhhmmssffff");
@@ -104,6 +103,8 @@ namespace Replacer.Models
                         doc.MainDocumentPart.Document.Save();
                     }
                 }
+                reporter.SendProgress(rowsCount - 1, rowsCount - 1);
+
                 resultInfo.CountActs = values.Rows.Count - 1;
             }
         }

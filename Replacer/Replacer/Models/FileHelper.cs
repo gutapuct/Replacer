@@ -72,6 +72,9 @@ namespace Replacer.Models
 
             int pointer = 1;
             byte[] ret;
+
+            var reporter = new WebReporter();
+
             try
             {
                 using (WordprocessingDocument mainDocument = WordprocessingDocument.Open(mainStream, true))
@@ -79,15 +82,10 @@ namespace Replacer.Models
 
                     XElement newBody = XElement.Parse(mainDocument.MainDocumentPart.Document.Body.OuterXml);
 
-                    var reporter = new WebReporter();
-
                     var documentsCount = documents.Count;
                     for (pointer = 1; pointer < documentsCount; pointer++)
                     {
-                        if (pointer % 5 == 0)
-                        {
-                            reporter.SendProgress(documentsCount, pointer);
-                        }
+                        reporter.SendProgress(documentsCount, pointer);
 
                         WordprocessingDocument tempDocument = WordprocessingDocument.Open(new MemoryStream(documents[pointer]), true);
                         XElement tempBody = XElement.Parse(tempDocument.MainDocumentPart.Document.Body.OuterXml);
@@ -97,17 +95,18 @@ namespace Replacer.Models
                         mainDocument.MainDocumentPart.Document.Save();
                         mainDocument.Package.Flush();
                     }
+                    reporter.SendProgress(documentsCount, documentsCount);
                 }
             }
             catch (OpenXmlPackageException oxmle)
             {
-                // TODO: connect SignalR
-                // Console.WriteLine($"Error while merging files: Document index {0}. {oxmle.Message}");
+                reporter.AddError(oxmle.Message);
+                throw;
             }
             catch (Exception e)
             {
-                // TODO: connect SignalR
-                // Console.WriteLine($"Error while merging files: Document index {0}. {e.Message}");
+                reporter.AddError(e.Message);
+                throw;
             }
             finally
             {

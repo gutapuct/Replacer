@@ -14,5 +14,11 @@ namespace Replacer.Hubs
             var context = GlobalHost.ConnectionManager.GetHubContext<HubWebReporter>();
             context.Clients.All.sendProgress(max, current); 
         }
+
+        public void AddError(string message)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<HubWebReporter>();
+            context.Clients.All.addError(message);
+        }
     }
 }

@@ -86,6 +86,10 @@ export default {
                     console.log('max: ' + max + '; current: ' + current);
                 });
 
+                proxy.on('addError', function (message) {
+                    console.log(message);
+                });
+
                 connection.start()
                     .done(function () { console.log('Connection successfully (ID=' + connection.id + ')'); })
                     .fail(function () { that.addErrorToModal('Сервер не отвечает. Проверьте службу.'); });
@@ -107,6 +111,7 @@ export default {
             this.toggleModal();
         },
         start(){
+            this.btnDisabled = true;
             this.loadingShow = true
             let data = new FormData();
             data.append('fileTemplate', this.fileTemplate);
@@ -116,6 +121,7 @@ export default {
                 .post(api.postStart, data)
                 .then(
                     function(response){
+                        this.btnDisabled = false;
                         this.modalTitle = "Импорт завершен";
                         this.loadingShow = false;
                         var results = response.data.Errors;
@@ -125,6 +131,7 @@ export default {
                     function(error){
                         this.modalTitle = "Ошибка";
                         this.loadingShow = false;
+                        this.btnDisabled = false;
                         if (error && error.data && error.data.Errors)
                         {
                             this.addErrorsToModal(error.data.Errors);

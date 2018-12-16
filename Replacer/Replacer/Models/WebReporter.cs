@@ -15,5 +15,10 @@ namespace Replacer.Models
         {
             hub.SendProgress(max, current);
         }
+
+        public void AddError(string message)
+        {
+            hub.AddError(message);
+        }
     }
 }
