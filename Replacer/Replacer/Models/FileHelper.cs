@@ -79,13 +79,15 @@ namespace Replacer.Models
 
                     XElement newBody = XElement.Parse(mainDocument.MainDocumentPart.Document.Body.OuterXml);
 
-                    for (pointer = 1; pointer < documents.Count; pointer++)
+                    var reporter = new WebReporter();
+
+                    var documentsCount = documents.Count;
+                    for (pointer = 1; pointer < documentsCount; pointer++)
                     {
-                        //TODO: connect SignalR
-                        //if (pointer % 5 == 0)
-                        //{
-                        //    Console.Write(".");
-                        //}
+                        if (pointer % 5 == 0)
+                        {
+                            reporter.SendProgress(documentsCount, pointer);
+                        }
 
                         WordprocessingDocument tempDocument = WordprocessingDocument.Open(new MemoryStream(documents[pointer]), true);
                         XElement tempBody = XElement.Parse(tempDocument.MainDocumentPart.Document.Body.OuterXml);

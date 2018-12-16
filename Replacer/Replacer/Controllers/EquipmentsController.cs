@@ -98,15 +98,10 @@ namespace Replacer
         [Route("~/api/equipment/order/{id}/{value}")]
         public async Task<IHttpActionResult> ChangeOrderAsync(string id, int value)
         {
-            var reporter = new WebReporter();
-            reporter.SendProgress(1, 2);
-
             var resultMessage = await _model.ChangeOrderAsync(id, value);
 
-            reporter.SendProgress(3, 4);
             if (resultMessage.Errors.Count == 0)
             {
-                reporter.SendProgress(5, 6);
                 return Ok();
             }
             else

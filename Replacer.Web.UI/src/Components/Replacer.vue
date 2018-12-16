@@ -71,7 +71,26 @@ export default {
             modalTitle: "Ошибка"
         }
     },
+    created() {
+        this.createSignalRConnection();
+    },
     methods: {
+        createSignalRConnection(){
+            const that = this;
+
+            setTimeout(() => {
+                const connection = window.$.hubConnection(api.getServerPath);
+                const proxy = connection.createHubProxy(api.getHubName);
+
+                proxy.on('sendProgress', function (max, current) {
+                    console.log('max: ' + max + '; current: ' + current);
+                });
+
+                connection.start()
+                    .done(function () { console.log('Connection successfully (ID=' + connection.id + ')'); })
+                    .fail(function () { that.addErrorToModal('Сервер не отвечает. Проверьте службу.'); });
+            }, 0);
+        },
         toggleModal(){
             if (this.modalShow) //if open
                 this.modalErrors = [];

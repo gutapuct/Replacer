@@ -10,16 +10,16 @@ namespace Replacer
         // parameter in the WebApp.Start method.
         public void Configuration(IAppBuilder appBuilder)
         {
-            appBuilder.MapSignalR();
-
             appBuilder.UseCors(CorsOptions.AllowAll);
-
+            appBuilder.MapSignalR();
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
 
             //config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             //config.Formatters.JsonFormatter.UseDataContractJsonSerializer = false;
+            
             config.MapHttpAttributeRoutes();
+            
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
@@ -28,7 +28,7 @@ namespace Replacer
             );
 
             appBuilder.UseWebApi(config);
-
+            
             SwaggerConfig.Register(config);
         }
     }
