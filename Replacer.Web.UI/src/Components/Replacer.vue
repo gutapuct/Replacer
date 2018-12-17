@@ -5,15 +5,8 @@
             :toggleModal="toggleModal"
             :modalShow="modalShow"
             :modalErrors="modalErrors"
-            :btnClick="goToMainPage"
             size="lg"
             :modalTitle="modalTitle"></ModalWindow>
-
-        <transition name="fade" mode="out-in">
-            <div class="loading" v-if="loadingShow">
-                <img src="../Content/images/loading.gif" />
-            </div>
-        </transition>
 
         <div>
             <div id="hello">
@@ -43,10 +36,24 @@
                     </b-row>
                 </div>
             </transition>
+
             <transition name="fade" mode="out-in">
-                <b-row v-show="showBtnStart" class="pt-5">
-                    <b-button :disabled="checkBtnStart" type="submit" variant="success" @click="start()">Запустить</b-button>
+                <b-row class="pt-5">
+                    <b-button v-show="showBtnStart" :disabled="checkBtnStart" type="submit" variant="success" @click="start()">Запустить</b-button>
+                    <b-button v-show="showOneMoreBtn" variant="primary" @click="clickOneMoreBtn()" class="ml-3">Еще раз</b-button>
+                    <img v-if="loadingShow" class="loading" src="../Content/images/loading.gif" />
                 </b-row>
+            </transition>
+
+            <transition name="fade" mode="out-in">
+                <div class="mt-5" v-if="showProgress">
+                    <span>Создание актов: <strong>{{currentCreating}} / {{maxCreating}}</strong></span>
+                    <b-progress :max="maxCreating" :value="currentCreating" class="mb-3" height="20px" :animated="getAnimatedCreating">
+                        
+                    </b-progress>
+                    <span>Объединение актов: <strong >{{currentCombine}} / {{maxCombine}}</strong></span>
+                    <b-progress :max="maxCombine" :value="currentCombine" class="mb-3" height="20px" :animated="getAnimatedCombine"></b-progress>
+                </div>
             </transition>
         </div>
     </div>
@@ -66,9 +73,15 @@ export default {
             fileValues: {},
             modalShow: false,
             modalErrors: [],
-            btnDisabled: true,
+            btnDisabled: false,
             loadingShow: false,
-            modalTitle: "Ошибка"
+            modalTitle: "Ошибка",
+            showOneMoreBtn: false,
+            currentCreating: 0,
+            maxCreating: 0,
+            currentCombine: 0,
+            maxCombine: 0,
+            showProgress: false,
         }
     },
     created() {
@@ -82,8 +95,14 @@ export default {
                 const connection = window.$.hubConnection(api.getServerPath);
                 const proxy = connection.createHubProxy(api.getHubName);
 
-                proxy.on('sendProgress', function (max, current) {
-                    console.log('max: ' + max + '; current: ' + current);
+                proxy.on('sendProgress', function (max, current, type) {
+                    if (type === 0) { // Creating acts
+                        that.maxCreating = max;
+                        that.currentCreating = current;
+                    } else if (type === 1) { // Cobine acts
+                        that.maxCombine = max;
+                        that.currentCombine = current;
+                    }
                 });
 
                 proxy.on('addError', function (message) {
@@ -94,6 +113,14 @@ export default {
                     .done(function () { console.log('Connection successfully (ID=' + connection.id + ')'); })
                     .fail(function () { that.addErrorToModal('Сервер не отвечает. Проверьте службу.'); });
             }, 0);
+        },
+        clickOneMoreBtn(){
+            this.btnDisabled = false;
+            this.showOneMoreBtn = false;
+            this.currentCreating = 0;
+            this.maxCreating = 0;
+            this.currentCombine = 0;
+            this.maxCombine = 0;
         },
         toggleModal(){
             if (this.modalShow) //if open
@@ -112,7 +139,8 @@ export default {
         },
         start(){
             this.btnDisabled = true;
-            this.loadingShow = true
+            this.loadingShow = true;
+            this.showProgress = true;
             let data = new FormData();
             data.append('fileTemplate', this.fileTemplate);
             data.append('fileValues', this.fileValues);
@@ -121,7 +149,8 @@ export default {
                 .post(api.postStart, data)
                 .then(
                     function(response){
-                        this.btnDisabled = false;
+                        this.showOneMoreBtn = true;
+                        this.showProgress = false;
                         this.modalTitle = "Импорт завершен";
                         this.loadingShow = false;
                         var results = response.data.Errors;
@@ -130,8 +159,9 @@ export default {
                     },
                     function(error){
                         this.modalTitle = "Ошибка";
+                        this.showProgress = false;
                         this.loadingShow = false;
-                        this.btnDisabled = false;
+                        this.showOneMoreBtn = false;
                         if (error && error.data && error.data.Errors)
                         {
                             this.addErrorsToModal(error.data.Errors);
@@ -141,9 +171,6 @@ export default {
                     }
                 )
         },
-        goToMainPage(){
-            document.location.reload();
-        }
     },
     computed: {
         checkFormTemplate(){
@@ -160,7 +187,13 @@ export default {
             return this.checkFormTemplate && this.checkFormValues;
         },
         checkBtnStart(){
-            return this.showBtnStart && !this.btnDisabled
+            return this.showBtnStart && this.btnDisabled
+        },
+        getAnimatedCreating(){
+            return this.currentCreating !== this.maxCreating;
+        },
+        getAnimatedCombine(){
+            return this.currentCombine !== this.maxCombine;
         },
     }
 }
@@ -171,15 +204,9 @@ export default {
     content: "Загрузить";
 }
 
-#replacer .loading img{
-    width: 25%;
-    position: absolute;
-    margin: auto;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    z-index: 100;
+.loading{
+    width: 5%;
+    height: 5%;
 }
 
 #hello{

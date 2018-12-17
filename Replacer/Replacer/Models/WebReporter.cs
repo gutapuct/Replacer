@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Replacer.Enums;
 
 namespace Replacer.Models
 {
@@ -11,9 +12,9 @@ namespace Replacer.Models
     {
         private HubWebReporter hub = new HubWebReporter();
 
-        public void SendProgress(int max, int current)
+        public void SendProgress(int max, int current, TypeProgressBar type)
         {
-            hub.SendProgress(max, current);
+            hub.SendProgress(max, current, type);
         }
 
         public void AddError(string message)

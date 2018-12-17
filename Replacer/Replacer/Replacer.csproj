@@ -196,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\SwaggerConfig.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="Hubs\HubWebReporter.cs" />
     <Compile Include="Models\ExcelHelper.cs" />
     <Compile Include="Business\Replacer.cs" />

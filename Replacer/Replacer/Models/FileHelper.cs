@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static Replacer.Enums;
 
 namespace Replacer.Models
 {
@@ -85,7 +86,7 @@ namespace Replacer.Models
                     var documentsCount = documents.Count;
                     for (pointer = 1; pointer < documentsCount; pointer++)
                     {
-                        reporter.SendProgress(documentsCount, pointer);
+                        reporter.SendProgress(documentsCount, pointer, TypeProgressBar.CobineActs);
 
                         WordprocessingDocument tempDocument = WordprocessingDocument.Open(new MemoryStream(documents[pointer]), true);
                         XElement tempBody = XElement.Parse(tempDocument.MainDocumentPart.Document.Body.OuterXml);
@@ -95,7 +96,7 @@ namespace Replacer.Models
                         mainDocument.MainDocumentPart.Document.Save();
                         mainDocument.Package.Flush();
                     }
-                    reporter.SendProgress(documentsCount, documentsCount);
+                    reporter.SendProgress(documentsCount, documentsCount, TypeProgressBar.CobineActs);
                 }
             }
             catch (OpenXmlPackageException oxmle)
