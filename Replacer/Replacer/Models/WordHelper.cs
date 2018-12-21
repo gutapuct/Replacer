@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using MongoDB.Driver;
+using static Replacer.Enums;
 
 namespace Replacer.Models
 {
@@ -17,7 +18,7 @@ namespace Replacer.Models
         public static string FolderForTemplate = "FolderForTemplate";
         private static object LockObject = new object();
 
-        public async static Task CreateAllActsAsync(HttpContent content, string pathToTempFolder, List<Equipment> equipments, WorkResultInfo resultInfo)
+        public async static Task CreateAllActsAsync(HttpContent content, string pathToTempFolder, List<Equipment> equipments, WorkResultInfo resultInfo, string connectionid)
         {
             var hasError = false;
             var provider = new MultipartMemoryStreamProvider();
@@ -27,15 +28,14 @@ namespace Replacer.Models
 
             using (var stream = await provider.Contents[0].ReadAsStreamAsync())
             {
-                for (var value = 1; value < values.Rows.Count; value++)
-                {
-                    //TODO: logs for SignalR
-                    //if (value % 5 == 0)
-                    //{
-                    //    Console.Write(".");
-                    //}
+                var reporter = new WebReporter();
+                var rowsCount = values.Rows.Count;
 
-                    System.Threading.Thread.Sleep(1);
+                for (var value = 1; value < rowsCount; value++)
+                {
+                    reporter.SendProgress(rowsCount-1, value, TypeProgressBar.CreatingActs, connectionid);
+
+                    System.Threading.Thread.Sleep(20);
                     var date = DateTime.Now.ToString("yyyyMMddhhmmssffff");
                     var copyPath = $"{pathToTempFolder}\\{date}_{value}.docx";
 
@@ -104,7 +104,9 @@ namespace Replacer.Models
                         doc.MainDocumentPart.Document.Save();
                     }
                 }
-                resultInfo.CountActs = values.Rows.Count - 1;
+                reporter.SendProgress(rowsCount - 1, rowsCount - 1, TypeProgressBar.CreatingActs, connectionid);
+
+                resultInfo.CountActs = rowsCount - 1;
             }
         }
 

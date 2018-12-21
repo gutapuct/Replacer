@@ -1,6 +1,9 @@
-const server = "http://localhost:9009/api/";
+const serverPath = "http://localhost:9009"
+const server = serverPath + "/api/";
 
 export default {
+    getServerPath: serverPath,
+    getHubName: "hubWebReporter",
     getAllEquipments: server + "equipments",
     postAddNewEquipment: server + "equipments",
     postChangeEquipmentNames: server + "equipments/names",
@@ -10,5 +13,5 @@ export default {
     postDeleteEquipment: server + 'equipments/',
     postChangeOrder: server + "equipment/order/",
     postImportDb: server + "importdb",
-    postStart: server + "start"
+    postStart: server + "start/"
 }

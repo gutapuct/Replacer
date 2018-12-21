@@ -1,7 +1,6 @@
 ﻿using Owin;
 using System.Web.Http;
 using Microsoft.Owin.Cors;
-using Newtonsoft.Json.Serialization;
 
 namespace Replacer
 {
@@ -12,15 +11,15 @@ namespace Replacer
         public void Configuration(IAppBuilder appBuilder)
         {
             appBuilder.UseCors(CorsOptions.AllowAll);
-
+            appBuilder.MapSignalR();
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
 
             //config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             //config.Formatters.JsonFormatter.UseDataContractJsonSerializer = false;
+            
             config.MapHttpAttributeRoutes();
-
-            //TODO: connect SignalR
+            
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
@@ -29,7 +28,7 @@ namespace Replacer
             );
 
             appBuilder.UseWebApi(config);
-
+            
             SwaggerConfig.Register(config);
         }
     }

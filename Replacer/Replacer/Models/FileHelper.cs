@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static Replacer.Enums;
 
 namespace Replacer.Models
 {
@@ -44,9 +45,9 @@ namespace Replacer.Models
             return fileList;
         }
 
-        public static void SaveNewFile(IList<byte[]> files)
+        public static void SaveNewFile(IList<byte[]> files, string connectionid)
         {
-            var result = OpenAndCombine(files);
+            var result = OpenAndCombine(files, connectionid);
 
             var date = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss.ffff");
             var folderToSaveFile = ConfigurationManager.AppSettings.Get("PathToSaveFile");
@@ -63,7 +64,7 @@ namespace Replacer.Models
             File.WriteAllBytes(filePath, result);
         }
 
-        private static byte[] OpenAndCombine(IList<byte[]> documents)
+        private static byte[] OpenAndCombine(IList<byte[]> documents, string connectionid)
         {
             MemoryStream mainStream = new MemoryStream();
 
@@ -72,6 +73,9 @@ namespace Replacer.Models
 
             int pointer = 1;
             byte[] ret;
+
+            var reporter = new WebReporter();
+
             try
             {
                 using (WordprocessingDocument mainDocument = WordprocessingDocument.Open(mainStream, true))
@@ -79,13 +83,10 @@ namespace Replacer.Models
 
                     XElement newBody = XElement.Parse(mainDocument.MainDocumentPart.Document.Body.OuterXml);
 
-                    for (pointer = 1; pointer < documents.Count; pointer++)
+                    var documentsCount = documents.Count;
+                    for (pointer = 1; pointer < documentsCount; pointer++)
                     {
-                        //TODO: connect SignalR
-                        //if (pointer % 5 == 0)
-                        //{
-                        //    Console.Write(".");
-                        //}
+                        reporter.SendProgress(documentsCount, pointer, TypeProgressBar.CobineActs, connectionid);
 
                         WordprocessingDocument tempDocument = WordprocessingDocument.Open(new MemoryStream(documents[pointer]), true);
                         XElement tempBody = XElement.Parse(tempDocument.MainDocumentPart.Document.Body.OuterXml);
@@ -95,17 +96,18 @@ namespace Replacer.Models
                         mainDocument.MainDocumentPart.Document.Save();
                         mainDocument.Package.Flush();
                     }
+                    reporter.SendProgress(documentsCount, documentsCount, TypeProgressBar.CobineActs, connectionid);
                 }
             }
             catch (OpenXmlPackageException oxmle)
             {
-                // TODO: connect SignalR
-                // Console.WriteLine($"Error while merging files: Document index {0}. {oxmle.Message}");
+                reporter.AddError(oxmle.Message, connectionid);
+                throw;
             }
             catch (Exception e)
             {
-                // TODO: connect SignalR
-                // Console.WriteLine($"Error while merging files: Document index {0}. {e.Message}");
+                reporter.AddError(e.Message, connectionid);
+                throw;
             }
             finally
             {
