@@ -34,12 +34,14 @@ namespace Replacer.Models
                     if (!String.IsNullOrWhiteSpace(reason))
                     {
                         var reasonAndRecommendation = reason.Split('|');
-                        if (reasonAndRecommendation.Where(i => i.Length > 0).Count() == 2)
+                        if (reasonAndRecommendation.Where(i => i.Length > 0).Count() > 0 && reasonAndRecommendation[0].Trim().Length > 0)
                         {
                             reasons.Add(new Reason
                             {
                                 NameReason = reasonAndRecommendation[0].Trim(),
-                                NameRecommendation = reasonAndRecommendation[1].Trim(),
+                                NameRecommendation = reasonAndRecommendation.Where(i => i.Length > 0).Count() > 1
+                                    ? reasonAndRecommendation[1].Trim()
+                                    : "",
                             });
                         }
                     }
