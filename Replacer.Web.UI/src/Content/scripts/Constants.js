@@ -13,5 +13,5 @@ export default {
     postDeleteEquipment: server + 'equipments/',
     postChangeOrder: server + "equipment/order/",
     postImportDb: server + "importdb",
-    postStart: server + "start"
+    postStart: server + "start/"
 }

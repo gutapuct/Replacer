@@ -12,14 +12,14 @@ namespace Replacer.Models
     {
         private HubWebReporter hub = new HubWebReporter();
 
-        public void SendProgress(int max, int current, TypeProgressBar type)
+        public void SendProgress(int max, int current, TypeProgressBar type, string connectionid)
         {
-            hub.SendProgress(max, current, type);
+            hub.SendProgress(max, current, type, connectionid);
         }
 
-        public void AddError(string message)
+        public void AddError(string message, string connectionid)
         {
-            hub.AddError(message);
+            hub.AddError(message, connectionid);
         }
     }
 }

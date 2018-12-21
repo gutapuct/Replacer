@@ -45,9 +45,9 @@ namespace Replacer.Models
             return fileList;
         }
 
-        public static void SaveNewFile(IList<byte[]> files)
+        public static void SaveNewFile(IList<byte[]> files, string connectionid)
         {
-            var result = OpenAndCombine(files);
+            var result = OpenAndCombine(files, connectionid);
 
             var date = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss.ffff");
             var folderToSaveFile = ConfigurationManager.AppSettings.Get("PathToSaveFile");
@@ -64,7 +64,7 @@ namespace Replacer.Models
             File.WriteAllBytes(filePath, result);
         }
 
-        private static byte[] OpenAndCombine(IList<byte[]> documents)
+        private static byte[] OpenAndCombine(IList<byte[]> documents, string connectionid)
         {
             MemoryStream mainStream = new MemoryStream();
 
@@ -86,7 +86,7 @@ namespace Replacer.Models
                     var documentsCount = documents.Count;
                     for (pointer = 1; pointer < documentsCount; pointer++)
                     {
-                        reporter.SendProgress(documentsCount, pointer, TypeProgressBar.CobineActs);
+                        reporter.SendProgress(documentsCount, pointer, TypeProgressBar.CobineActs, connectionid);
 
                         WordprocessingDocument tempDocument = WordprocessingDocument.Open(new MemoryStream(documents[pointer]), true);
                         XElement tempBody = XElement.Parse(tempDocument.MainDocumentPart.Document.Body.OuterXml);
@@ -96,17 +96,17 @@ namespace Replacer.Models
                         mainDocument.MainDocumentPart.Document.Save();
                         mainDocument.Package.Flush();
                     }
-                    reporter.SendProgress(documentsCount, documentsCount, TypeProgressBar.CobineActs);
+                    reporter.SendProgress(documentsCount, documentsCount, TypeProgressBar.CobineActs, connectionid);
                 }
             }
             catch (OpenXmlPackageException oxmle)
             {
-                reporter.AddError(oxmle.Message);
+                reporter.AddError(oxmle.Message, connectionid);
                 throw;
             }
             catch (Exception e)
             {
-                reporter.AddError(e.Message);
+                reporter.AddError(e.Message, connectionid);
                 throw;
             }
             finally

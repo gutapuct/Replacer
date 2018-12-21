@@ -273,7 +273,7 @@ namespace Replacer.Business
             return resultMessage;
         }
 
-        public async Task<ResultMessage> StartAsync(HttpContent content)
+        public async Task<ResultMessage> StartAsync(HttpContent content, string connectionid)
         {
             var resultMessage = new ResultMessage();
             var pathToTempFolder = $"{Environment.CurrentDirectory.Split(':')[0]}:\\temp\\{Guid.NewGuid().ToString()}";
@@ -287,9 +287,9 @@ namespace Replacer.Business
             try
             {
                 var equipments = collection.AsQueryable().ToList();
-                await WordHelper.CreateAllActsAsync(content, pathToTempFolder, equipments, resultInfo);
+                await WordHelper.CreateAllActsAsync(content, pathToTempFolder, equipments, resultInfo, connectionid);
                 var files = FileHelper.GetStreamAllFiles(pathToTempFolder);
-                FileHelper.SaveNewFile(files);
+                FileHelper.SaveNewFile(files, connectionid);
             }
             catch (Exception ex)
             {

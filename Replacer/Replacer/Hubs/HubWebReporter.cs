@@ -10,16 +10,16 @@ namespace Replacer.Hubs
 {
     public class HubWebReporter : Hub
     {
-        public void SendProgress(int max, int current, TypeProgressBar type)
+        public void SendProgress(int max, int current, TypeProgressBar type, string connectionid)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<HubWebReporter>();
-            context.Clients.All.sendProgress(max, current, type); 
+            context.Clients.Client(connectionid).sendProgress(max, current, type);
         }
 
-        public void AddError(string message)
+        public void AddError(string message, string connectionid)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<HubWebReporter>();
-            context.Clients.All.addError(message);
+            context.Clients.Client(connectionid).addError(message);
         }
     }
 }

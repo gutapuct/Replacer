@@ -121,11 +121,12 @@ namespace Replacer
         }
 
         [HttpPost]
-        [Route("~/api/start")]
-        public async Task<IHttpActionResult> StartAsync()
+        [Route("~/api/start/{connectionid}")]
+        public async Task<IHttpActionResult> StartAsync(string connectionid)
         {
-            var resultMessage = await _model.StartAsync(Request.Content);
-
+            var currentModel = new Business.Replacer();
+            var resultMessage = await currentModel.StartAsync(Request.Content, connectionid);
+            
             if (resultMessage.Errors.Count == 0)
                 return Ok(resultMessage.Object); 
             else

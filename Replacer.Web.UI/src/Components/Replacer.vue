@@ -82,6 +82,7 @@ export default {
             currentCombine: 0,
             maxCombine: 0,
             showProgress: false,
+            connectionId: ""
         }
     },
     created() {
@@ -110,7 +111,10 @@ export default {
                 });
 
                 connection.start()
-                    .done(function () { console.log('Connection successfully (ID=' + connection.id + ')'); })
+                    .done(function () {
+                        console.log('Connection successfully (ID=' + connection.id + ')');
+                        that.connectionId = connection.id;
+                    })
                     .fail(function () { that.addErrorToModal('Сервер не отвечает. Проверьте службу.'); });
             }, 0);
         },
@@ -146,7 +150,7 @@ export default {
             data.append('fileValues', this.fileValues);
 
             this.$http
-                .post(api.postStart, data)
+                .post(api.postStart + this.connectionId, data)
                 .then(
                     function(response){
                         this.showOneMoreBtn = true;

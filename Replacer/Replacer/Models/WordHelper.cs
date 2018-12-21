@@ -18,7 +18,7 @@ namespace Replacer.Models
         public static string FolderForTemplate = "FolderForTemplate";
         private static object LockObject = new object();
 
-        public async static Task CreateAllActsAsync(HttpContent content, string pathToTempFolder, List<Equipment> equipments, WorkResultInfo resultInfo)
+        public async static Task CreateAllActsAsync(HttpContent content, string pathToTempFolder, List<Equipment> equipments, WorkResultInfo resultInfo, string connectionid)
         {
             var hasError = false;
             var provider = new MultipartMemoryStreamProvider();
@@ -33,7 +33,7 @@ namespace Replacer.Models
 
                 for (var value = 1; value < rowsCount; value++)
                 {
-                    reporter.SendProgress(rowsCount-1, value, TypeProgressBar.CreatingActs);
+                    reporter.SendProgress(rowsCount-1, value, TypeProgressBar.CreatingActs, connectionid);
 
                     System.Threading.Thread.Sleep(20);
                     var date = DateTime.Now.ToString("yyyyMMddhhmmssffff");
@@ -104,7 +104,7 @@ namespace Replacer.Models
                         doc.MainDocumentPart.Document.Save();
                     }
                 }
-                reporter.SendProgress(rowsCount - 1, rowsCount - 1, TypeProgressBar.CreatingActs);
+                reporter.SendProgress(rowsCount - 1, rowsCount - 1, TypeProgressBar.CreatingActs, connectionid);
 
                 resultInfo.CountActs = rowsCount - 1;
             }
