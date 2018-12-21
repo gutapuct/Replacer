@@ -92,6 +92,19 @@ namespace Replacer.Models
                             foreach (var token in tokenTexts)
                             {
                                 token.Text = token.Text.Replace(pair.Key, pair.Value);
+                                if (token.Text.Contains("\\n"))
+                                {
+                                    var strs = token.Text.Split(new string[] { "\\n" }, StringSplitOptions.None);
+                                    token.Text = "";
+                                    for (var l = 0; l < strs.Length; l++)
+                                    {
+                                        token.Parent.AppendChild(new Text(strs[l]));
+                                        if (l != strs.Length - 1)
+                                        {
+                                            token.Parent.AppendChild(new Break());
+                                        }
+                                    }
+                                }
                             }
                         }
 
