@@ -93,9 +93,11 @@ namespace Replacer.Models
 
                         newBody.Add(tempBody);
                         mainDocument.MainDocumentPart.Document.Body = new Body(newBody.ToString());
-                        mainDocument.MainDocumentPart.Document.Save();
-                        mainDocument.Package.Flush();
                     }
+
+                    mainDocument.MainDocumentPart.Document.Save();
+                    mainDocument.Package.Flush();
+
                     reporter.SendProgress(documentsCount, documentsCount, TypeProgressBar.CobineActs, connectionid);
                 }
             }
