@@ -80,8 +80,9 @@ namespace Replacer.Models
             {
                 using (WordprocessingDocument mainDocument = WordprocessingDocument.Open(mainStream, true))
                 {
-
                     XElement newBody = XElement.Parse(mainDocument.MainDocumentPart.Document.Body.OuterXml);
+
+                    var bodies = new List<XElement>();
 
                     var documentsCount = documents.Count;
                     for (pointer = 1; pointer < documentsCount; pointer++)
@@ -92,11 +93,23 @@ namespace Replacer.Models
                         XElement tempBody = XElement.Parse(tempDocument.MainDocumentPart.Document.Body.OuterXml);
 
                         newBody.Add(tempBody);
-                        mainDocument.MainDocumentPart.Document.Body = new Body(newBody.ToString());
+                        
+                        bodies.Add(new XElement(newBody));
+                        newBody.RemoveAll();
                     }
 
-                    mainDocument.MainDocumentPart.Document.Save();
-                    mainDocument.Package.Flush();
+                    if (bodies.Any())
+                    {
+                        XElement resultBody = bodies[0];
+                        for (var i = 1; i < bodies.Count; i++)
+                        {
+                            resultBody.Add(bodies[i]);
+                        }
+                        mainDocument.MainDocumentPart.Document.Body = new Body(resultBody.ToString());
+
+                        mainDocument.MainDocumentPart.Document.Save();
+                        mainDocument.Package.Flush();
+                    }
 
                     reporter.SendProgress(documentsCount, documentsCount, TypeProgressBar.CobineActs, connectionid);
                 }

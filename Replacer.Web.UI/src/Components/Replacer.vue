@@ -48,11 +48,11 @@
             <transition name="fade" mode="out-in">
                 <div class="mt-5" v-if="showProgress">
                     <span>Создание актов: <strong>{{currentCreating}} / {{maxCreating}}</strong></span>
-                    <b-progress :max="maxCreating" :value="currentCreating" class="mb-3" height="20px" :animated="getAnimatedCreating">
+                    <b-progress :max="100" :value="getPercentCurrentCreating" class="mb-3" height="20px" :animated="getAnimatedCreating">
                         
                     </b-progress>
                     <span>Объединение актов: <strong >{{currentCombine}} / {{maxCombine}}</strong></span>
-                    <b-progress :max="maxCombine" :value="currentCombine" class="mb-3" height="20px" :animated="getAnimatedCombine"></b-progress>
+                    <b-progress :max="100" :value="getPercentCurrentCombine" class="mb-3" height="20px" :animated="getAnimatedCombine"></b-progress>
                 </div>
             </transition>
         </div>
@@ -198,6 +198,12 @@ export default {
         },
         getAnimatedCombine(){
             return this.currentCombine !== this.maxCombine;
+        },
+        getPercentCurrentCreating(){
+            return ((this.currentCreating / this.maxCreating) * 100)|0;
+        },
+        getPercentCurrentCombine(){
+            return ((this.currentCombine / this.maxCombine) * 100)|0;
         },
     }
 }

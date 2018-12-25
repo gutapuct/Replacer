@@ -35,7 +35,7 @@ namespace Replacer.Models
                 {
                     reporter.SendProgress(rowsCount-1, value, TypeProgressBar.CreatingActs, connectionid);
 
-                    System.Threading.Thread.Sleep(20);
+                    System.Threading.Thread.Sleep(1);
                     var date = DateTime.Now.ToString("yyyyMMddhhmmssffff");
                     var copyPath = $"{pathToTempFolder}\\{date}_{value}.docx";
 
