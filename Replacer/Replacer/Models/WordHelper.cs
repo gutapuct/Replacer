@@ -59,6 +59,11 @@ namespace Replacer.Models
                     // Add name of columns in the dictionary
                     for (var d = 0; d < values.Rows[0].ItemArray.Length; d++)
                     {
+                        if (values.Rows[0].ItemArray[d].ToString().Trim().Length == 0)
+                        {
+                            continue;
+                        }
+
                         if (pairsForReplacings.ContainsKey(values.Rows[0].ItemArray[d].ToString().Trim()))
                         {
                             throw new Exception("Some values consist more than one columns. Also, you can't use the same values in the different columns.");
