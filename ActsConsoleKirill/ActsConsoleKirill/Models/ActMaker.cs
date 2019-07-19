@@ -25,6 +25,7 @@ namespace ActsConsoleKirill.Models
         public const string CorrectTemplateFileFormat = "docx";
         public const string PlaceholderNumber = "number";
         public const string PlaceholderDate = "date";
+        private const string Separator = "!!!";
 
         private List<string> pathTemplates;
         private int indexCurrentTemplate = 0;
@@ -69,15 +70,16 @@ namespace ActsConsoleKirill.Models
                     Directory.CreateDirectory(pathToTempFolder);
                 }
 
-                var dateForResult = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss");
-
                 for (var i = 0; i < amountActs; i++)
                 {
                     CreateAct(i, amountActsPerDay, pathToTempFolder);
                 }
                 
-                var files = GetStreamAllFiles(pathToTempFolder);
-                SaveNewFile(files);
+                for (var i = 0; i < pathTemplates.Count; i++)
+                {
+                    var files = GetStreamAllFiles(pathToTempFolder, i);
+                    SaveNewFile(files);
+                }
             }
             catch
             {
@@ -164,10 +166,12 @@ namespace ActsConsoleKirill.Models
         private void CreateAct(int index, double amountActsPerDay, string pathToTempFolder)
         {
             var date = dateFrom.AddDays(index / amountActsPerDay).Date;
-            var copyPath = $"{pathToTempFolder}\\{index}.docx";
 
             var indexForTemplate = indexCurrentTemplate % pathTemplates.Count;
             indexCurrentTemplate++;
+
+            var fileName = GetFileName(pathTemplates[indexForTemplate]);
+            var copyPath = $"{pathToTempFolder}\\{fileName}{Separator}{GetEpochTimeUtcNow()}.{index}.docx";         
 
             using (FileStream template = new FileStream(pathTemplates[indexForTemplate], FileMode.Open))
             {
@@ -241,10 +245,12 @@ namespace ActsConsoleKirill.Models
             }
         }
 
-        private List<byte[]> GetStreamAllFiles(string pathToTempFolder)
+        private List<byte[]> GetStreamAllFiles(string pathToTempFolder, int indexTemplate)
         {
             var fileList = new List<byte[]>();
-            var files = Directory.GetFiles(pathToTempFolder);
+            var files = Directory.GetFiles(pathToTempFolder)
+                .Where(file => GetFileName(file).Split(new string[] { Separator }, StringSplitOptions.None).First() == GetFileName(pathTemplates[indexTemplate]))
+                .ToList();
 
             foreach (var file in files)
             {
@@ -259,7 +265,7 @@ namespace ActsConsoleKirill.Models
         {
             var result = OpenAndCombine(files);
 
-            var date = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss");
+            var date = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss.ffff");
 
             if (!Directory.Exists(pathToResult))
             {
@@ -338,5 +344,15 @@ namespace ActsConsoleKirill.Models
             }
             return (ret);
         }
+
+        private string GetFileName(string pathToFile)
+        {
+            var fileNameWithExtension = pathToFile.Split('\\').Last();
+            var fileName = String.Join(".", fileNameWithExtension.Split('.').Take(fileNameWithExtension.Split('.').Count() - 1).ToArray());
+
+            return fileName;
+        }
+
+        public long GetEpochTimeUtcNow() => (long)(DateTime.Now.ToUniversalTime() - new DateTime(1970, 1, 1).ToUniversalTime()).TotalMilliseconds;
     }
 }
