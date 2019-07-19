@@ -70,13 +70,24 @@ namespace ActsConsoleKirill.Models
                     Directory.CreateDirectory(pathToTempFolder);
                 }
 
+                reporter.WriteLine("Начало создания актов!");
+                reporter.Write("Создано: ");
                 for (var i = 0; i < amountActs; i++)
                 {
                     CreateAct(i, amountActsPerDay, pathToTempFolder);
+
+                    if (i % 100 == 0 && i != 0)
+                    {
+                        reporter.Write(i.ToString());
+                    }
                 }
-                
+
+                reporter.WriteLine(amountActs.ToString());
+
                 for (var i = 0; i < pathTemplates.Count; i++)
                 {
+                    reporter.WriteLine();
+                    reporter.WriteLine("Начало объединения актов! Файл №" + (i + 1));
                     var files = GetStreamAllFiles(pathToTempFolder, i);
                     SaveNewFile(files);
 
@@ -101,6 +112,8 @@ namespace ActsConsoleKirill.Models
 
                     Directory.Delete(pathToTempFolder);
                 }
+
+                reporter.WriteLine("Все акты сделаны. Акты можно найти по пути: " + pathToResult);
             }
         }
 
@@ -161,6 +174,7 @@ namespace ActsConsoleKirill.Models
             if (files.Count() > correctFiles.Count())
             {
                 reporter.WriteLine($@"Шаблоны могут быть только в формате "".docx"". В папке найдено некорректных файлов: {files.Count() - correctFiles.Count()}!");
+                reporter.WriteLine();
             }
 
             return correctFiles;
@@ -279,6 +293,7 @@ namespace ActsConsoleKirill.Models
 
             using (var newFile = File.Create(filePath)) { }
             File.WriteAllBytes(filePath, result);
+            reporter.WriteLine("Сохранено!");
         }
 
         private byte[] OpenAndCombine(IList<byte[]> documents)
@@ -300,9 +315,14 @@ namespace ActsConsoleKirill.Models
                     var bodies = new List<XElement>();
 
                     var documentsCount = documents.Count;
+                    reporter.Write("Объединено актов: ");
+
                     for (pointer = 1; pointer < documentsCount; pointer++)
                     {
-                        //reporter.SendProgress(documentsCount, pointer, TypeProgressBar.CobineActs, connectionid);
+                        if (pointer % 100 == 0 && pointer != 0)
+                        {
+                            reporter.Write(pointer.ToString());
+                        }
 
                         WordprocessingDocument tempDocument = WordprocessingDocument.Open(new MemoryStream(documents[pointer]), true);
                         XElement tempBody = XElement.Parse(tempDocument.MainDocumentPart.Document.Body.OuterXml);
@@ -313,6 +333,8 @@ namespace ActsConsoleKirill.Models
                         newBody.RemoveAll();
                     }
 
+                    reporter.WriteLine(pointer.ToString());
+
                     if (bodies.Any())
                     {
                         XElement resultBody = bodies[0];
@@ -320,28 +342,24 @@ namespace ActsConsoleKirill.Models
                         {
                             resultBody.Add(bodies[i]);
                         }
+                        reporter.Write("Идёт сохранение...");
                         mainDocument.MainDocumentPart.Document.Body = new Body(resultBody.ToString());
 
                         mainDocument.MainDocumentPart.Document.Save();
                         mainDocument.Package.Flush();
                     }
-
-                    //reporter.SendProgress(documentsCount, documentsCount, TypeProgressBar.CobineActs, connectionid);
                 }
             }
             catch (OpenXmlPackageException oxmle)
             {
-                //reporter.AddError(oxmle.Message, connectionid);
                 throw;
             }
             catch (OutOfMemoryException)
             {
-                //log message
-                throw;
+                throw new Exception("Не хватает оперативной памяти (ОЗУ). Попробуйте закрыть ненужные программы или указать меньшее количество актов.");
             }
             catch (Exception e)
             {
-                //reporter.AddError(e.Message, connectionid);
                 throw;
             }
             finally

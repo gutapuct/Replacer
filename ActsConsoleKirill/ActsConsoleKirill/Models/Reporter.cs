@@ -11,7 +11,7 @@ namespace ActsConsoleKirill.Models
     {
         public void Write(string message)
         {
-            Console.Write(message);
+            Console.Write(message + " ");
         }
 
         public void WriteLine(string message)

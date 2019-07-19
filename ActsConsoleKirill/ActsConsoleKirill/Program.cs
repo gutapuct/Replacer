@@ -16,7 +16,8 @@ namespace ActsConsoleKirill
                 var reporter = new ConsoleReporter();
                 var actMaker = new ActMaker(reporter);
                 actMaker.Run();
-                Console.WriteLine("Конец");
+                Console.WriteLine();
+                Console.WriteLine("Для выхода нажмите любую клавишу!");
             }
             catch (Exception ex)
             {
