@@ -79,6 +79,9 @@ namespace ActsConsoleKirill.Models
                 {
                     var files = GetStreamAllFiles(pathToTempFolder, i);
                     SaveNewFile(files);
+
+                    files = null;
+                    GC.Collect();
                 }
             }
             catch
@@ -329,6 +332,11 @@ namespace ActsConsoleKirill.Models
             catch (OpenXmlPackageException oxmle)
             {
                 //reporter.AddError(oxmle.Message, connectionid);
+                throw;
+            }
+            catch (OutOfMemoryException)
+            {
+                //log message
                 throw;
             }
             catch (Exception e)
