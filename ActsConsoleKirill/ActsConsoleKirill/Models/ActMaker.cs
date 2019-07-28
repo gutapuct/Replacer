@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OpenXmlPowerTools;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.Xml.Linq;
@@ -18,6 +17,7 @@ namespace ActsConsoleKirill.Models
         private readonly DateTime dateFrom;
         private readonly DateTime dateTo;
         private readonly int amountActs;
+        private readonly int startNumberOfActs;
 
         private readonly string pathToFolderTemplates;
         private readonly string pathToResult;
@@ -48,7 +48,17 @@ namespace ActsConsoleKirill.Models
 
             if (!int.TryParse(ConfigurationManager.AppSettings["amountActs"], out amountActs))
             {
-                throw new Exception(@"Неверно указано количество актов. Пример: ""10000"" (без пробелов)");
+                throw new Exception(@"Неверно указано количество актов. Пример: ""2000"" (без пробелов)");
+            }
+
+            if (amountActs > 3000)
+            {
+                throw new Exception(@"Укажите количество актов не более 3000.");
+            }
+
+            if (!int.TryParse(ConfigurationManager.AppSettings["startNumberOfActs"], out startNumberOfActs))
+            {
+                throw new Exception(@"Неверно указан первый номер акта. Пример: ""1"" (без пробелов)");
             }
 
             dateFrom = GetDateTimeValue(ConfigurationManager.AppSettings["dateFrom"]);
@@ -57,9 +67,19 @@ namespace ActsConsoleKirill.Models
 
         public void Run()
         {
+            //var file1 = @"C:\Temp\ActsTemp\1.docx";
+            //var file2 = @"C:\Temp\ActsTemp\2.docx";
+
+            //var sources = new List<Source>();
+            //sources.Add(new Source(new WmlDocument(file1)));
+            //sources.Add(new Source(new WmlDocument(file2)));
+            
+            //var mergedDoc = DocumentBuilder.BuildDocument(sources);
+            //mergedDoc.SaveAs(@"C:\Temp\ActsTemp\333.docx");
+
             var amountDays = (dateTo - dateFrom).TotalDays + 1;
             var amountActsPerDay = amountActs / amountDays;
-            var pathToTempFolder = $"{Environment.CurrentDirectory.Split(':')[0]}:\\temp\\Acts_temp_{Guid.NewGuid().ToString()}";
+            var pathToTempFolder = $"{ Environment.CurrentDirectory.Split(':')[0]}:\\temp\\Acts_temp_{Guid.NewGuid().ToString()}";
 
             pathTemplates = GetPathTemplates();
 
@@ -72,7 +92,7 @@ namespace ActsConsoleKirill.Models
 
                 reporter.WriteLine("Начало создания актов!");
                 reporter.Write("Создано: ");
-                for (var i = 0; i < amountActs; i++)
+                for (var i = startNumberOfActs; i < startNumberOfActs + amountActs; i++)
                 {
                     CreateAct(i, amountActsPerDay, pathToTempFolder);
 
@@ -252,11 +272,11 @@ namespace ActsConsoleKirill.Models
                     }
                 }
 
-                if (texts.Any())
-                {
-                    Paragraph PageBreakParagraph = new Paragraph(new Run(new Break() { Type = BreakValues.Page }));
-                    doc.MainDocumentPart.Document.Body.Append(PageBreakParagraph);
-                }
+                //if (texts.Any())
+                //{
+                //    Paragraph PageBreakParagraph = new Paragraph(new Run(new Break() { Type = BreakValues.Page }));
+                //    doc.MainDocumentPart.Document.Body.Append(PageBreakParagraph);
+                //}
 
                 doc.MainDocumentPart.Document.Save();
             }
@@ -266,7 +286,7 @@ namespace ActsConsoleKirill.Models
         {
             var fileList = new List<byte[]>();
             var files = Directory.GetFiles(pathToTempFolder)
-                .Where(file => GetFileName(file).Split(new string[] { Separator }, StringSplitOptions.None).First() == GetFileName(pathTemplates[indexTemplate]))
+                //.Where(file => GetFileName(file).Split(new string[] { Separator }, StringSplitOptions.None).First() == GetFileName(pathTemplates[indexTemplate]))
                 .ToList();
 
             foreach (var file in files)
