@@ -51,7 +51,7 @@ namespace ActsConsoleKirill.Models
                 throw new Exception(@"Неверно указано количество актов. Пример: ""2000"" (без пробелов)");
             }
 
-            if (amountActs > 3000)
+            if (amountActs > 2000 || amountActs < 1)
             {
                 throw new Exception(@"Укажите количество актов не более 3000.");
             }
@@ -61,22 +61,17 @@ namespace ActsConsoleKirill.Models
                 throw new Exception(@"Неверно указан первый номер акта. Пример: ""1"" (без пробелов)");
             }
 
+            if (startNumberOfActs < 1)
+            {
+                throw new Exception(@"Начальное число должно быть положительным!.");
+            }
+
             dateFrom = GetDateTimeValue(ConfigurationManager.AppSettings["dateFrom"]);
             dateTo = GetDateTimeValue(ConfigurationManager.AppSettings["dateTo"]);
         }
 
         public void Run()
         {
-            //var file1 = @"C:\Temp\ActsTemp\1.docx";
-            //var file2 = @"C:\Temp\ActsTemp\2.docx";
-
-            //var sources = new List<Source>();
-            //sources.Add(new Source(new WmlDocument(file1)));
-            //sources.Add(new Source(new WmlDocument(file2)));
-            
-            //var mergedDoc = DocumentBuilder.BuildDocument(sources);
-            //mergedDoc.SaveAs(@"C:\Temp\ActsTemp\333.docx");
-
             var amountDays = (dateTo - dateFrom).TotalDays + 1;
             var amountActsPerDay = amountActs / amountDays;
             var pathToTempFolder = $"{ Environment.CurrentDirectory.Split(':')[0]}:\\temp\\Acts_temp_{Guid.NewGuid().ToString()}";
@@ -98,22 +93,13 @@ namespace ActsConsoleKirill.Models
 
                     if (i % 100 == 0 && i != 0)
                     {
-                        reporter.Write(i.ToString());
+                        reporter.Write((i - startNumberOfActs + 1).ToString());
                     }
                 }
 
                 reporter.WriteLine(amountActs.ToString());
 
-                for (var i = 0; i < pathTemplates.Count; i++)
-                {
-                    reporter.WriteLine();
-                    reporter.WriteLine("Начало объединения актов! Файл №" + (i + 1));
-                    var files = GetStreamAllFiles(pathToTempFolder, i);
-                    SaveNewFile(files);
-
-                    files = null;
-                    GC.Collect();
-                }
+                SaveNewFile(pathToTempFolder);
             }
             catch
             {
@@ -207,8 +193,7 @@ namespace ActsConsoleKirill.Models
             var indexForTemplate = indexCurrentTemplate % pathTemplates.Count;
             indexCurrentTemplate++;
 
-            var fileName = GetFileName(pathTemplates[indexForTemplate]);
-            var copyPath = $"{pathToTempFolder}\\{fileName}{Separator}{GetEpochTimeUtcNow()}.{index}.docx";         
+            var copyPath = $"{pathToTempFolder}\\{GetEpochTimeUtcNow()}.{index}.docx";         
 
             using (FileStream template = new FileStream(pathTemplates[indexForTemplate], FileMode.Open))
             {
@@ -256,7 +241,7 @@ namespace ActsConsoleKirill.Models
 
                 foreach (var token in tokenTexts.Where(t => t.Text.ToLower().Contains(PlaceholderNumber)))
                 {
-                    token.Text = token.Text.Replace(PlaceholderNumber, (index+1).ToString());
+                    token.Text = token.Text.Replace(PlaceholderNumber, index.ToString());
                     if (token.Text.Contains("\\n"))
                     {
                         var strs = token.Text.Split(new string[] { "\\n" }, StringSplitOptions.None);
@@ -282,121 +267,31 @@ namespace ActsConsoleKirill.Models
             }
         }
 
-        private List<byte[]> GetStreamAllFiles(string pathToTempFolder, int indexTemplate)
+        private void SaveNewFile(string pathToTempFolder)
         {
-            var fileList = new List<byte[]>();
-            var files = Directory.GetFiles(pathToTempFolder)
-                //.Where(file => GetFileName(file).Split(new string[] { Separator }, StringSplitOptions.None).First() == GetFileName(pathTemplates[indexTemplate]))
-                .ToList();
+            reporter.WriteLine("Объединение актов (может занять много времени).");
 
-            foreach (var file in files)
+            var sources = new List<Source>();
+            var files = Directory.GetFiles(pathToTempFolder);
+
+            foreach (var f in files)
             {
-                byte[] textByteArray = File.ReadAllBytes(file);
-                fileList.Add(textByteArray);
+                sources.Add(new Source(new WmlDocument(f)));
             }
-
-            return fileList;
-        }
-
-        private void SaveNewFile(IList<byte[]> files)
-        {
-            var result = OpenAndCombine(files);
-
-            var date = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss.ffff");
 
             if (!Directory.Exists(pathToResult))
             {
                 Directory.CreateDirectory(pathToResult);
             }
 
+            var date = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss.ffff");
             var filePath = $"{pathToResult}\\Acts {date}.docx";
 
-            using (var newFile = File.Create(filePath)) { }
-            File.WriteAllBytes(filePath, result);
+            var mergedDoc = DocumentBuilder.BuildDocument(sources);
+            mergedDoc.SaveAs(filePath);
+
+            GC.Collect();
             reporter.WriteLine("Сохранено!");
-        }
-
-        private byte[] OpenAndCombine(IList<byte[]> documents)
-        {
-            MemoryStream mainStream = new MemoryStream();
-
-            mainStream.Write(documents[0], 0, documents[0].Length);
-            mainStream.Position = 0;
-
-            int pointer = 1;
-            byte[] ret;
-
-            try
-            {
-                using (WordprocessingDocument mainDocument = WordprocessingDocument.Open(mainStream, true))
-                {
-                    XElement newBody = XElement.Parse(mainDocument.MainDocumentPart.Document.Body.OuterXml);
-
-                    var bodies = new List<XElement>();
-
-                    var documentsCount = documents.Count;
-                    reporter.Write("Объединено актов: ");
-
-                    for (pointer = 1; pointer < documentsCount; pointer++)
-                    {
-                        if (pointer % 100 == 0 && pointer != 0)
-                        {
-                            reporter.Write(pointer.ToString());
-                        }
-
-                        WordprocessingDocument tempDocument = WordprocessingDocument.Open(new MemoryStream(documents[pointer]), true);
-                        XElement tempBody = XElement.Parse(tempDocument.MainDocumentPart.Document.Body.OuterXml);
-
-                        newBody.Add(tempBody);
-
-                        bodies.Add(new XElement(newBody));
-                        newBody.RemoveAll();
-                    }
-
-                    reporter.WriteLine(pointer.ToString());
-
-                    if (bodies.Any())
-                    {
-                        XElement resultBody = bodies[0];
-                        for (var i = 1; i < bodies.Count; i++)
-                        {
-                            resultBody.Add(bodies[i]);
-                        }
-                        reporter.Write("Идёт сохранение...");
-                        mainDocument.MainDocumentPart.Document.Body = new Body(resultBody.ToString());
-
-                        mainDocument.MainDocumentPart.Document.Save();
-                        mainDocument.Package.Flush();
-                    }
-                }
-            }
-            catch (OpenXmlPackageException oxmle)
-            {
-                throw;
-            }
-            catch (OutOfMemoryException)
-            {
-                throw new Exception("Не хватает оперативной памяти (ОЗУ). Попробуйте закрыть ненужные программы или указать меньшее количество актов.");
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-            finally
-            {
-                ret = mainStream.ToArray();
-                mainStream.Close();
-                mainStream.Dispose();
-            }
-            return (ret);
-        }
-
-        private string GetFileName(string pathToFile)
-        {
-            var fileNameWithExtension = pathToFile.Split('\\').Last();
-            var fileName = String.Join(".", fileNameWithExtension.Split('.').Take(fileNameWithExtension.Split('.').Count() - 1).ToArray());
-
-            return fileName;
         }
 
         public long GetEpochTimeUtcNow() => (long)(DateTime.Now.ToUniversalTime() - new DateTime(1970, 1, 1).ToUniversalTime()).TotalMilliseconds;
