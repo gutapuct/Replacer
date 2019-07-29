@@ -51,9 +51,9 @@ namespace ActsConsoleKirill.Models
                 throw new Exception(@"Неверно указано количество актов. Пример: ""2000"" (без пробелов)");
             }
 
-            if (amountActs > 2000 || amountActs < 1)
+            if (amountActs > 10000 || amountActs < 1)
             {
-                throw new Exception(@"Укажите количество актов не более 3000.");
+                throw new Exception(@"Укажите количество актов не более 10000.");
             }
 
             if (!int.TryParse(ConfigurationManager.AppSettings["startNumberOfActs"], out startNumberOfActs))
@@ -97,7 +97,8 @@ namespace ActsConsoleKirill.Models
                     }
                 }
 
-                reporter.WriteLine(amountActs.ToString());
+                reporter.WriteLine();
+                reporter.WriteLine($"Готово. Всего актово создано: {amountActs.ToString()}");
 
                 SaveNewFile(pathToTempFolder);
             }
@@ -279,6 +280,15 @@ namespace ActsConsoleKirill.Models
                 sources.Add(new Source(new WmlDocument(f)));
             }
 
+            var pathToTempSources = $@"{pathToTempFolder}\temp1";
+            if (!Directory.Exists(pathToTempSources))
+            {
+                Directory.CreateDirectory(pathToTempSources);
+            }
+
+            CreateFinalSources(sources, pathToTempSources);
+            reporter.WriteLine("Подождите еще немножко....");
+
             if (!Directory.Exists(pathToResult))
             {
                 Directory.CreateDirectory(pathToResult);
@@ -287,11 +297,52 @@ namespace ActsConsoleKirill.Models
             var date = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss.ffff");
             var filePath = $"{pathToResult}\\Acts {date}.docx";
 
+            sources.Clear();
+            files = Directory.GetFiles($@"{pathToTempFolder}\temp1");
+
+            foreach (var f in files)
+            {
+                sources.Add(new Source(new WmlDocument(f)));
+            }
+
             var mergedDoc = DocumentBuilder.BuildDocument(sources);
             mergedDoc.SaveAs(filePath);
 
+            foreach (var file in files)
+            {
+                File.Delete(file);
+            }
+
+            Directory.Delete(pathToTempSources);
+
             GC.Collect();
             reporter.WriteLine("Сохранено!");
+        }
+
+        private void CreateFinalSources(List<Source> sources, string pathToTempSources)
+        {
+            reporter.Write("Начинается объединение актов: ");
+
+            var skip = 0;
+            var take = 50;
+            while (true)
+            {
+                if (skip * take >= sources.Count)
+                {
+                    break;
+                }
+
+                var currentSources = sources.Skip(skip * take).Take(take).ToList();
+
+                var mergedDoc = DocumentBuilder.BuildDocument(currentSources);
+                mergedDoc.SaveAs($"{pathToTempSources}\\{GetEpochTimeUtcNow()}.docx");
+
+                skip++;
+                GC.Collect();
+
+                reporter.Write((skip * take).ToString());
+            }
+            reporter.WriteLine();
         }
 
         public long GetEpochTimeUtcNow() => (long)(DateTime.Now.ToUniversalTime() - new DateTime(1970, 1, 1).ToUniversalTime()).TotalMilliseconds;
