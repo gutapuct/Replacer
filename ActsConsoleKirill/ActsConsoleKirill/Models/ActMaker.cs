@@ -18,6 +18,7 @@ namespace ActsConsoleKirill.Models
         private readonly DateTime dateTo;
         private readonly int amountActs;
         private readonly int startNumberOfActs;
+        private readonly int amountActsInsideOneDocument;
 
         private readonly string pathToFolderTemplates;
         private readonly string pathToResult;
@@ -25,7 +26,6 @@ namespace ActsConsoleKirill.Models
         public const string CorrectTemplateFileFormat = "docx";
         public const string PlaceholderNumber = "number";
         public const string PlaceholderDate = "date";
-        private const string Separator = "!!!";
 
         private List<string> pathTemplates;
         private int indexCurrentTemplate = 0;
@@ -64,6 +64,10 @@ namespace ActsConsoleKirill.Models
             if (startNumberOfActs < 1)
             {
                 throw new Exception(@"Начальное число должно быть положительным!.");
+            }
+            if (!int.TryParse(ConfigurationManager.AppSettings["amountActsInsideOneDocument"], out amountActsInsideOneDocument))
+            {
+                amountActsInsideOneDocument = 99;
             }
 
             dateFrom = GetDateTimeValue(ConfigurationManager.AppSettings["dateFrom"]);
@@ -258,20 +262,12 @@ namespace ActsConsoleKirill.Models
                     }
                 }
 
-                //if (texts.Any())
-                //{
-                //    Paragraph PageBreakParagraph = new Paragraph(new Run(new Break() { Type = BreakValues.Page }));
-                //    doc.MainDocumentPart.Document.Body.Append(PageBreakParagraph);
-                //}
-
                 doc.MainDocumentPart.Document.Save();
             }
         }
 
         private void SaveNewFile(string pathToTempFolder)
         {
-            reporter.WriteLine("Объединение актов (может занять много времени).");
-
             var sources = new List<Source>();
             var files = Directory.GetFiles(pathToTempFolder);
 
@@ -280,51 +276,22 @@ namespace ActsConsoleKirill.Models
                 sources.Add(new Source(new WmlDocument(f)));
             }
 
-            var pathToTempSources = $@"{pathToTempFolder}\temp1";
-            if (!Directory.Exists(pathToTempSources))
-            {
-                Directory.CreateDirectory(pathToTempSources);
-            }
-
-            CreateFinalSources(sources, pathToTempSources);
-            reporter.WriteLine("Подождите еще немножко....");
-
             if (!Directory.Exists(pathToResult))
             {
                 Directory.CreateDirectory(pathToResult);
             }
 
-            var date = DateTime.Now.ToString("yyyy.MM.dd hh-mm-ss.ffff");
-            var filePath = $"{pathToResult}\\Acts {date}.docx";
-
-            sources.Clear();
-            files = Directory.GetFiles($@"{pathToTempFolder}\temp1");
-
-            foreach (var f in files)
-            {
-                sources.Add(new Source(new WmlDocument(f)));
-            }
-
-            var mergedDoc = DocumentBuilder.BuildDocument(sources);
-            mergedDoc.SaveAs(filePath);
-
-            foreach (var file in files)
-            {
-                File.Delete(file);
-            }
-
-            Directory.Delete(pathToTempSources);
-
-            GC.Collect();
+            CreateFinalSources(sources, pathToResult);
             reporter.WriteLine("Сохранено!");
         }
 
-        private void CreateFinalSources(List<Source> sources, string pathToTempSources)
+        private void CreateFinalSources(List<Source> sources, string pathToResults)
         {
             reporter.Write("Начинается объединение актов: ");
 
             var skip = 0;
-            var take = 50;
+            var take = amountActsInsideOneDocument;
+
             while (true)
             {
                 if (skip * take >= sources.Count)
@@ -335,12 +302,12 @@ namespace ActsConsoleKirill.Models
                 var currentSources = sources.Skip(skip * take).Take(take).ToList();
 
                 var mergedDoc = DocumentBuilder.BuildDocument(currentSources);
-                mergedDoc.SaveAs($"{pathToTempSources}\\{GetEpochTimeUtcNow()}.docx");
+                mergedDoc.SaveAs($"{pathToResults}\\{GetEpochTimeUtcNow()}_{(skip * take) + startNumberOfActs}-{(skip * take) + startNumberOfActs - 1 + currentSources.Count}.docx");
 
                 skip++;
                 GC.Collect();
 
-                reporter.Write((skip * take).ToString());
+                reporter.Write(((skip * take) - take + currentSources.Count).ToString());
             }
             reporter.WriteLine();
         }
